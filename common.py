@@ -6,7 +6,7 @@ import gc
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import precision_recall_curve, make_scorer, accuracy_score, roc_curve, roc_auc_score
 
-class cs_metrics:
+class cs_metrics(object):
     @staticmethod
     def cross_validate_auc(model, X, y, kfold, *fit_args):
       validate_aucs = []

@@ -1,6 +1,6 @@
 import pandas as pd
 
-class cs_data_generate():
+class cs_data_generate(object):
 
     @staticmethod
     def GenerateIsMissFeatures(data):
