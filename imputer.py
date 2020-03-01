@@ -1,5 +1,5 @@
 import numpy as np
-from bpca import BPCA
+from .bpca import BPCA
 import gc
 
 class Imputer():
