@@ -5,7 +5,7 @@ import pandas as pd
 import gc
 
 # DataFilter class for filter opration on data
-class cs_datafilter():
+class cs_data_filter():
     """ DataFilter
     
     Used for filter opration on data
