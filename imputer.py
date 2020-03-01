@@ -238,7 +238,7 @@ class BPCA(base.BaseEstimator):
         
 
 
-class Imputer():
+class Imputer(object):
     def __init__(self):
         self._pca = BPCA()
     
