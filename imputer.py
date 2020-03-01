@@ -1,5 +1,4 @@
 import numpy as np
-from .bpca import BPCA
 import gc
 from sklearn import base
 import scipy
