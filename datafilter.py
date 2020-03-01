@@ -47,7 +47,7 @@ class cs_data_filter(object):
 
         assert(type(missing_rate) == float),"missing_rate must be float"
 
-        miss_values = self._missValueTable(train_data,['None','na','Nan','NaN'])
+        miss_values = cs_data_filter._missValueTable(train_data,['None','na','Nan','NaN'])
 
         drop_features = miss_values[miss_values[miss_values.columns[1]] >= missing_rate].index.values.tolist()
 
@@ -87,7 +87,7 @@ class cs_data_filter(object):
         data_cp = data.copy()
 
         for indx,value in enumerate(data_cp):
-          if self._isPattern(value,patterns):
+          if cs_data_filter._isPattern(value,patterns):
             data_cp.iat[indx] = to_value
 
         return data_cp
@@ -131,7 +131,7 @@ class cs_data_filter(object):
         True: if value in missing_patterns or isnan
         False: vice versa
         """
-        return self._isPattern(value, missing_patterns) or (type(value) == float and np.isnan(value)) 
+        return cs_data_filter._isPattern(value, missing_patterns) or (type(value) == float and np.isnan(value)) 
 
     @staticmethod
     def _missValueTable(df, missing_patterns, verbosity = False):
@@ -161,7 +161,7 @@ class cs_data_filter(object):
 
         # Iterate through columns name
         for col_name in df:
-          sr = pd.Series({col_name:df[df.apply(lambda row: self._isMissing(row[col_name],missing_patterns), axis=1)].shape[0]})
+          sr = pd.Series({col_name:df[df.apply(lambda row: cs_data_filter._isMissing(row[col_name],missing_patterns), axis=1)].shape[0]})
           total_miss_values = total_miss_values.append(sr)
     
         # Drop feauture without having missing values
