@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import KFold
 
-class Encoder():
+class cs_encoder():
     @staticmethod  
     def KFoldTargetEncoding(train_data, test_data, target_name, feature_name, n_folds = 5):
         """K-FoldsTargetEncoding
