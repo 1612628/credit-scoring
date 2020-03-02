@@ -242,9 +242,9 @@ class Imputer(object):
     def __init__(self):
         self._pca = BPCA()
     
-    def fit_transform(self, data=None,batch_size=100, epochs = 10, full_dimens = True, verbose=False, print_every=10):
+    def fit(self, data=None,batch_size=100, epochs = 10, full_dimens = True, verbose=False, print_every=10):
         """
-        Fit observations and transform missing data
+        Fit observations 
 
         Parameters
         ----------
@@ -276,33 +276,93 @@ class Imputer(object):
         
 
         # Data (Nxd)
-        self._data = data.copy()
+        _data = data.copy()
         # Missing (Nxd) {False, True}
-        self._missing = np.isnan(data)
+        _missing = np.isnan(data)
         # Obsered (Nxd) {False, True}
-        self._observed = ~self._missing
-        self._mse = np.zeros(epochs)
+        _observed = ~_missing
+        _mse = np.zeros(epochs)
 
-        row_defau = np.zeros(self._data.shape[1])
-        row_means = np.repeat(np.nanmean(self._data, axis=0, out=row_defau).reshape(1,-1),self._data.shape[0], axis=0)
+        row_defau = np.zeros(_data.shape[1])
+        row_means = np.repeat(np.nanmean(_data, axis=0, out=row_defau).reshape(1,-1),_data.shape[0], axis=0)
         
-        self._data[self._missing] = row_means[self._missing]
-        self._data = np.nan_to_num(self._data)
+        _data[_missing] = row_means[_missing]
+        _data = np.nan_to_num(_data)
 
         for epoch in range(epochs):
 
-            self._pca.fit(X=self._data,batch_size=batch_size,verbose=verbose, print_every = print_every)
+            self._pca.fit(X=_data,batch_size=batch_size,verbose=verbose, print_every = print_every)
 
-            temp = self._pca.inverse_transform(self._pca.transform(self._data, full=full_dimens), full=full_dimens)
-            self._data[self._missing] = temp[self._missing]
+            temp = self._pca.inverse_transform(self._pca.transform(_data, full=full_dimens), full=full_dimens)
+            _data[_missing] = temp[_missing]
 
-            self._mse[epoch] = np.sum((self._data[self._observed] - temp[self._observed])**2)/self._data.shape[0]
+            _mse[epoch] = np.sum((_data[_observed] - temp[_observed])**2)/_data.shape[0]
 
             if verbose:
-                print(f'Epoch {epoch} Mean squared estimation: {self._mse[epoch]}')            
+                print(f'Epoch {epoch} Mean squared estimation: {_mse[epoch]}')            
         
         gc.enable()
-        del self._missing, self._observed
+        del _missing, _observed, _data
         gc.collect()
 
-        return self._data
+        return self
+
+
+    def transform(self, data=None, full_dimens=True):
+        """
+        Tranforms missing data
+
+        Parameters
+        ----------
+        data: ndarray (required)
+            Dataset Nxd (samples x features) contains only numerical fields
+        """
+        # Validate variables
+        assert (type(data) == np.ndarray), 'data must be numpy ndarray'
+        
+        # Data (Nxd)
+        _data = data.copy()
+        # Missing (Nxd) {False, True}
+        _missing = np.isnan(data)
+        # Obsered (Nxd) {False, True}
+        _observed = _missing
+        
+        row_defau = np.zeros(_data.shape[1])
+        row_means = np.repeat(np.nanmean(_data, axis=0, out=row_defau).reshape(1,-1),_data.shape[0], axis=0)
+        
+        _data[_missing] = row_means[_missing]
+        _data = np.nan_to_num(_data)
+
+        _data[_missing] = self._pca.inverse_transform(self._pca.transform(_data, full=full_dimens), full=full_dimens)[_missing]
+
+        gc.enable()
+        del _missing, _observed
+        gc.collect()
+
+        return _data
+
+
+    def fit_transform(self, data=None,batch_size=100, epochs = 10, full_dimens = True, verbose=False, print_every=10):
+        """
+        Fit observations and transform missing data
+
+        Parameters
+        ----------
+
+        data: ndarray (required)
+            Dataset Nxd (samples x features) contains only numerical fields
+        batch_size: int (required, default = 100)
+            Number of samples in each batch. batch_size must be <= N
+        epochs: int (required, default = 100)
+            The number of times running algorithms
+        verbose: bool (options, default = False)
+            Print summary some information of fitting operation
+        print_every: int (options, active when verbose = True) 
+            Print summary information in every print_every
+            For example batch_size = 100, N =1000 then iterations =10
+            Now if print_every = 2 then summary information will be print in {0,2,4,6,8,10} iterations round
+        full_dimens: bool (options, default = True)
+            If true the using q = d -1 dimensional principal components
+            If false the using self.ed to controll the dimentional principal components needed
+        """
+        return self.fit(data=data, batch_size=batch_size, epochs=epochs, full_dimens=full_dimens, verbose=verbose, print_every=print_every).transform(data)
