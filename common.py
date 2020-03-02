@@ -106,7 +106,7 @@ class cs_plots:
         elif isinstance(X, np.ndarray):
           X_train, X_validate = X[train_index], X[validate_index]
           y_train, y_validate = y[train_index], y[validate_index]
-
+        model.fit(X_train, y_train)
         cs_plots.plot_auc_all(model, X_train, y_train, X_validate, y_validate)
         print('\n\n')
     @staticmethod
