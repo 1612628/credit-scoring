@@ -286,7 +286,7 @@ class Imputer(object):
         _missing = np.isnan(_data)
         # Obsered (Nxd) {False, True}
         _observed = ~_missing
-        _mse = [np.inf]
+        _prev_mse = np.inf
 
         row_defau = np.zeros(_data.shape[1])
         row_means = np.repeat(np.nanmean(_data, axis=0, out=row_defau).reshape(1,-1),_data.shape[0], axis=0)
@@ -302,19 +302,19 @@ class Imputer(object):
 
             mse = np.sum((_data[_observed] - temp[_observed])**2)/_data.shape[0]
             
-            mse_residual = mse - _mse[-1]
+            mse_residual = mse - _prev_mse
             if np.abs(mse_residual) < 1e-3:
                 break
 
             if mse_residual < 0:
                 _data[_missing] = temp[_missing]
-                _mse.append(mse)
+                _prev_mse = mse
 
             if verbose:
                 print(f'Epoch {epoch} Mean squared estimation: {_mse[-1]}')            
         
         gc.enable()
-        del _missing, _observed, _data
+        del _missing, _observed, _data, _prev_mse
         gc.collect()
 
         return self
