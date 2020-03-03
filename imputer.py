@@ -123,7 +123,7 @@ class BPCA(base.BaseEstimator):
             self.a_alpha_tilde = self.a_alpha + self.d
             self.b_alpha_tilde = np.abs(np.random.randn(self.q))
             self.a_tau_tilde = self.a_tau + self.N * self.d / 2
-            self.b_tau_title = np.abs(np.random.randn(1))
+            self.b_tau_tilde = np.abs(np.random.randn(1))
         self.X = X.T
 
         order = np.arange(self.N)
@@ -148,7 +148,7 @@ class BPCA(base.BaseEstimator):
         we calculate in X_b observations
         """
         # inverse of the sigma^2
-        self.tau = self.a_tau_tilde / self.b_tau_title
+        self.tau = self.a_tau_tilde / self.b_tau_tilde
         # hyperparameters controlling the magnitudes of each column of the weight matrix 
         self.alpha = self.a_alpha_tilde / self.b_alpha_tilde
         
@@ -314,7 +314,7 @@ class Imputer(object):
                 print(f'Epoch {epoch} Mean squared estimation: {_prev_mse}')            
         
         gc.enable()
-        del _missing, _observed, _data, _prev_mse
+        del _missing, _observed, _data, _prev_mse, temp
         gc.collect()
 
         return self
