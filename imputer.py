@@ -302,10 +302,11 @@ class Imputer(object):
 
             mse = np.sum((_data[_observed] - temp[_observed])**2)/_data.shape[0]
             
-            if np.abs(mse - _mse[-1]) < 1e-3:
+            mse_residual = mse - _mse[-1]
+            if np.abs(mse_residual) < 1e-3:
                 break
 
-            if mse < _mse[-1]:
+            if mse_residual < 0:
                 _data[_missing] = temp[_missing]
                 _mse.append(mse)
 
