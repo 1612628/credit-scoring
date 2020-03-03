@@ -296,7 +296,7 @@ class Imputer(object):
 
         for epoch in range(epochs):
 
-            self._pca.fit(X=_data,batch_size=batch_size,verbose=verbose, print_every = print_every, no_repeat=True)
+            self._pca.fit(X=_data,batch_size=batch_size,verbose=verbose, print_every = print_every, no_repeat=False)
 
             temp = self._pca.inverse_transform(self._pca.transform(_data, full=full_dimens), full=full_dimens)
 
