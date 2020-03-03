@@ -26,6 +26,8 @@ class BPCA(base.BaseEstimator):
 
         self.beta = beta
 
+        self.X = None
+
     def iterations(self, N=None, batch_size=None):
         """
         Calculate iterations with respect to batch_size
@@ -77,7 +79,7 @@ class BPCA(base.BaseEstimator):
         return loglikelihood
 
 
-    def fit(self, X=None, batch_size=128, verbose=False, print_every = 5):
+    def fit(self, X=None, batch_size=128, verbose=False, print_every = 5, no_repeat=True):
         """
         fit the Bayesian PCA model
 
@@ -94,6 +96,8 @@ class BPCA(base.BaseEstimator):
             Print summary information in every print_every
             For example batch_size = 100, N =1000 then iterations =10
             Now if print_every = 2 then summary information will be print in {0,2,4,6,8,10} iterations round
+        no_repeat: bool (options, default = True)
+            Check if non running repeatly, if False then you want to keep previous variational parameters and missing-value place holders
         """
 
         # Validate variables
@@ -102,24 +106,25 @@ class BPCA(base.BaseEstimator):
         assert (type(verbose) == bool), 'verbose must be bool'
 
         # Get data X (dxN), number of features d, number of samples N, reduced dimensions q, 
-        self.X = X.T
-        self.d = self.X.shape[0]
-        self.N = self.X.shape[1]
+        self.d = X.T.shape[0]
+        self.N = X.T.shape[1]
         self.q = self.d - 1
         self.ed = []
         self.batch_size = int(min(batch_size,self.N))
-        
-        # Variational parameters
-        self.mean_z = np.random.randn(self.q, self.batch_size) # latent variable
-        self.cov_z = np.eye(self.q)
-        self.mean_mu = np.random.rand(self.d,1)
-        self.cov_mu = np.eye(self.d)
-        self.mean_w = np.random.randn(self.d, self.q)
-        self.cov_w = np.eye(self.q)
-        self.a_alpha_tilde = self.a_alpha + self.d
-        self.b_alpha_tilde = np.abs(np.random.randn(self.q))
-        self.a_tau_tilde = self.a_tau + self.N * self.d / 2
-        self.b_tau_title = np.abs(np.random.randn(1))
+
+        if (no_repeat == True) or (self.X is None):        
+            # Variational parameters
+            self.mean_z = np.random.randn(self.q, self.batch_size) # latent variable
+            self.cov_z = np.eye(self.q)
+            self.mean_mu = np.random.rand(self.d,1)
+            self.cov_mu = np.eye(self.d)
+            self.mean_w = np.random.randn(self.d, self.q)
+            self.cov_w = np.eye(self.q)
+            self.a_alpha_tilde = self.a_alpha + self.d
+            self.b_alpha_tilde = np.abs(np.random.randn(self.q))
+            self.a_tau_tilde = self.a_tau + self.N * self.d / 2
+            self.b_tau_title = np.abs(np.random.randn(1))
+        self.X = X.T
 
         order = np.arange(self.N)
         iters = self.iterations(self.N, self.batch_size)
@@ -291,7 +296,7 @@ class Imputer(object):
 
         for epoch in range(epochs):
 
-            self._pca.fit(X=_data,batch_size=batch_size,verbose=verbose, print_every = print_every)
+            self._pca.fit(X=_data,batch_size=batch_size,verbose=verbose, print_every = print_every, no_repeat=True)
 
             temp = self._pca.inverse_transform(self._pca.transform(_data, full=full_dimens), full=full_dimens)
 
