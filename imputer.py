@@ -311,7 +311,7 @@ class Imputer(object):
                 _prev_mse = mse
 
             if verbose:
-                print(f'Epoch {epoch} Mean squared estimation: {_mse[-1]}')            
+                print(f'Epoch {epoch} Mean squared estimation: {_prev_mse}')            
         
         gc.enable()
         del _missing, _observed, _data, _prev_mse
