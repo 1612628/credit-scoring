@@ -301,6 +301,10 @@ class Imputer(object):
             temp = self._pca.inverse_transform(self._pca.transform(_data, full=full_dimens), full=full_dimens)
 
             mse = np.sum((_data[_observed] - temp[_observed])**2)/_data.shape[0]
+            
+            if np.abs(mse - _mse[-1]) < 1e-3:
+                break
+
             if mse < _mse[-1]:
                 _data[_missing] = temp[_missing]
                 _mse.append(mse)
