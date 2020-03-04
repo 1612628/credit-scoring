@@ -247,7 +247,7 @@ class Imputer(object):
     def __init__(self):
         self._pca = BPCA()
     
-    def fit(self, data=None,batch_size=100, epochs = 10, full_dimens = True, verbose=False, print_every=10):
+    def fit(self, data=None,batch_size=100, epochs = 10, err_threshold = 1e-2, full_dimens = True, verbose=False, print_every=10):
         """
         Fit observations 
 
@@ -260,6 +260,8 @@ class Imputer(object):
             Number of samples in each batch. batch_size must be <= N
         epochs: int (required, default = 100)
             The number of times running algorithms
+        err_threshold: float (required, default = 1e-2)
+            Threshold used for stopping running if error residual (mse) < err_threshold
         verbose: bool (options, default = False)
             Print summary some information of fitting operation
         print_every: int (options, active when verbose = True) 
@@ -303,7 +305,7 @@ class Imputer(object):
             mse = np.sum((_data[_observed] - temp[_observed])**2)/_data.shape[0]
             
             mse_residual = mse - _prev_mse
-            if np.abs(mse_residual) < 1e-3:
+            if np.abs(mse_residual) < err_threshold:
                 break
 
             if mse_residual < 0:
