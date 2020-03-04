@@ -171,6 +171,50 @@ class cs_plots:
         sns.barplot(list(sort_dic.keys()),list(sort_dic.values()))
 
     @staticmethod
+    def kde_target(df=None, label=None, fea_name=None):
+      """
+      Plot the distribution of a variable colored by value of target
+
+      Parameters
+      ----------
+      df: DataFrame (required, default=None)
+        The dataframe with label and features needed to plot
+      label: str (required, default=None)
+        Name of label features
+      fea_name: str (required, default=None)
+        Name of feature need to be plotted
+      """
+      # Validate variables
+      assert (type(df) == pd.DataFrame),'df must be pandas DataFrame'
+      assert (type(label) == str),'label must be string'
+      assert (type(fea_name) == str), 'fea_ture must be string'
+
+      #Calculate the correlation coefficient between the new variable and the target
+      corr = df[label].corr(df[fea_name])
+
+      #Calculate medians for repaid vs not repaid
+      median_repaid = df.loc[df[label] == 0, fea_name].median()
+      median_not_repaid = df.loc[df[label] == 1, fea_name].median()
+
+      plt.figure(figsize=(12,6))
+
+      # Plot the distribution for target == 0 and target == 1
+      sns.kdeplot(df.loc[df[label] == 0, fea_name], label ='label == 0')
+      sns.kdeplot(df.loc[df[label] == 1, fea_name], label ='label == 1')
+
+      #label the plot 
+      plt.xlabel(fea_name)
+      plt.ylabel('Density')
+      plt.title('%s Distribution'%(fea_name))
+
+      #print out the correlation
+      print('The correlation between ',fea_name, ' and the label is ',corr)
+      #print out average values
+      print('Median value for loan that was not repaid = ',median_not_repaid)
+      print('Median value for loan that was repaid = ',median_repaid)
+
+
+    @staticmethod
     def Visualization(data, target):
         """
         Visualize data base on the following dtypes scheme
