@@ -1,4 +1,4 @@
-project kapala-credit-scoring
+project: kapala-credit-scoring
 
 name: kapala-credit-scoring
 tag: [solution-1, stacking]
