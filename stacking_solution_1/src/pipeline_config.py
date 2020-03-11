@@ -29,8 +29,8 @@ SOLUTION_CONFIG = AttrDict({
         'experiment_dir': params.experiment_dir
         },
     'hyperparameter_search':{
-        'method': param_eval(params.hyperparameter_search_method),
-        'runs': param_eval(params.hyperparameter_search_runs)
+        'method': param_eval(params.hyperparameter_search__method),
+        'runs': param_eval(params.hyperparameter_search__runs)
         },
     'feature_selection':{
         'use_train': params.use_train
