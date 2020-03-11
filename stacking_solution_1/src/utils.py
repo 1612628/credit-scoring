@@ -43,7 +43,7 @@ def init_logger():
   Create a new or get a current logger and set default attributes
   """
   logger = logging.getLogger('kapala-credit-sccoring')
-  logger.setLever(logging.INFO)
+  logger.setLevel(logging.INFO)
   mess_format = logging.Formatter(fmt='%(asctime)s %(name)s >>> %(message)s', datefmt='%Y-%m-%d %H-%M-%S')
 
   # Console handler for validation information
