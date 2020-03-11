@@ -86,7 +86,7 @@ SOLUTION_CONFIG = AttrDict({
         'reg_alpha': param_eval(params.lgbm__reg_alpha),
         'is_unbalanced': param_eval(params.lgbm__is_unbalanced),
         'scale_pos_weight': param_eval(params.lgbm__scale_pos_weight),
-        'verbose': param_eval(params.lgbm__verbose)
+        'verbose': param_eval(params.verbose)
     },
     'catboost': {
         'loss_function': param_eval(params.catboost__loss_function),
@@ -103,7 +103,7 @@ SOLUTION_CONFIG = AttrDict({
         'od_wait': param_eval(params.catboost__od_wait),
         'random_seed': RANDOM_SEED,
         'thread_count': params.num_workers,
-        'verbose': params.verbose,
+        'verbose': param_eval(params.verbose),
     },
 
     'xgboost': {
@@ -121,11 +121,11 @@ SOLUTION_CONFIG = AttrDict({
         'alpha': param_eval(params.xgb__alpha),
         'max_bin': param_eval(params.xgb__max_bin),
         'num_leaves': param_eval(params.xgb__max_leaves),
-        'nthread': param_eval(params.num_workers),
         'nrounds': param_eval(params.xgb__nrounds),
         'early_stopping_rounds': param_eval(params.xgb__early_stopping_rounds),
         'scale_pos_weight': param_eval(params.xgb__scale_pos_weight),
         'verbose': param_eval(params.verbose),
+        'nthread': param_eval(params.num_workers),
     },
 
     'random_forest': {
