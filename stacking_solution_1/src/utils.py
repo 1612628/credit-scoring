@@ -50,7 +50,7 @@ def init_logger():
   ch_va = logging.StreamHandler(sys.stdout)
   ch_va.setLevel(logging.INFO)
   ch_va.setFormatter(mess_format)
-  logger.addHanlder(ch_va)
+  logger.addHandler(ch_va)
 
   return logger
 
