@@ -20,7 +20,7 @@ from .utils import init_logger, read_params, set_seed, create_submission, verify
 set_seed(config.RANDOM_SEED)
 logger = init_logger()
 ctx = neptune.Context()
-params = read_params(ctx, fallback_file='../configs/neptune.yaml')
+params = read_params(ctx, fallback_file='./credit-scoring/stacking_solution_1/configs/neptune.yaml')
 
 
 class PipelineManager:

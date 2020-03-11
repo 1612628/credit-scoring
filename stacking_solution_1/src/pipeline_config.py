@@ -6,7 +6,7 @@ from deepsense import neptune
 from .utils import read_params, param_eval
 
 ctx = neptune.Context()
-params = read_params(ctx, fallback_file='../configs/neptune.yaml')
+params = read_params(ctx, fallback_file='./credit-scoring/stacking_solution_1/configs/neptune.yaml')
 
 RANDOM_SEED = 90310
 DEV_SAMPLE_SIZE = 500

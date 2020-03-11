@@ -19,10 +19,10 @@ exclude:
 
 parameters:
 # Data
-  train_filepath: '../../../input/train_input_imputed.csv'
-  test_filepath: '../../../input/train_input_imputed.csv'
-  first_level_oof_predictions_dir: '../../../models/stacking_1/oof'
-  experiment_dir: '../../../models/stacking_1/exp'
+  train_filepath: './input/train_input_imputed.csv'
+  test_filepath: './input/test_input_imputed.csv'
+  first_level_oof_predictions_dir: './models/stacking_1/oof'
+  experiment_dir: './models/stacking_1/exp'
 # Data preparation
   n_cv_splits: 5
   dev_size: 0.2
