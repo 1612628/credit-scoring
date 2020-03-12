@@ -17,12 +17,12 @@ from steppy.base import BaseTransformer
 from sklearn.externals import joblib
 import sklearn.preprocessing as prep
 
-def create_submission(meta, preds):
+def create_submission(data, id_name, label_name, label_preds):
   """
   Creating submission pandas dataframe for submitting
   """
-  return pd.DataFrame({'id':meta['id'].tolist(),
-                       'label': preds})
+  return pd.DataFrame({id_name:data.index.tolist(),
+                       label_name: label_preds})
 
 def verify_submission(submission, sample_submission):
   """
