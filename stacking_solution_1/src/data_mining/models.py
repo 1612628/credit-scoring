@@ -1,6 +1,5 @@
 # models
 from attrdict import AttrDict
-from deepsense import neptune
 from steppy.base import BaseTransformer
 import numpy as np
 import pandas as pd
@@ -23,7 +22,6 @@ from ..common.utils import get_logger
 
 
 logger = get_logger()
-ctx = neptune.Context()
 
 def get_sklearn_classifier(ClassifierClass, **kwargs):
   class SklearnBinaryClassifier(SklearnClassifier):
