@@ -67,6 +67,7 @@ parameters:
   lgbm__reg_alpha: 0.0
   lgbm__is_unbalanced: True
   lgbm__scale_pos_weight: 1.
+  lgbm__callback_on: False
   
 # Catboost
   catboost__loss_function: Logloss

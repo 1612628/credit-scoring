@@ -3,7 +3,7 @@
 from attrdict import AttrDict
 from deepsense import neptune
 
-from .utils import read_params, param_eval
+from ..common.utils import read_params, param_eval
 
 ctx = neptune.Context()
 params = read_params(ctx, fallback_file='./credit-scoring/stacking_solution_1/configs/neptune.yaml')
@@ -27,38 +27,10 @@ BOOL_COLS = ['FIELD_1', 'FIELD_2', 'FIELD_12', 'FIELD_14', 'FIELD_15', 'FIELD_18
 SOLUTION_CONFIG = AttrDict({
     'pipeline':{
         'experiment_dir': params.experiment_dir
-        },
+    },
     'hyperparameter_search':{
         'method': param_eval(params.hyperparameter_search__method),
         'runs': param_eval(params.hyperparameter_search__runs)
-        },
-    'feature_selection':{
-        'use_train': params.use_train
-    },
-    'preprocessing':{
-        'fill_missing': params.fill_missing,
-        'fill_value': params.fill_value
-    },
-    'xgb_preprocessing':{
-        'one_hot_encoder':{
-            'drop_invariant': True
-        }
-    },
-    'neural_network_preprocessing':{
-        'one_hot_encoder':{
-            'drop_invariant': True
-        },
-        'fillna':{
-            'fill_value':params.fill_value
-        }
-    },
-    'sklearn_preprocessing':{
-        'one_hot_encoder':{
-            'drop_invariant': True
-        },
-        'fillna':{
-            'fill_value':params.fill_value
-        }
     },
     'train':{
         'table_name':'train',
@@ -86,7 +58,8 @@ SOLUTION_CONFIG = AttrDict({
         'reg_alpha': param_eval(params.lgbm__reg_alpha),
         'is_unbalanced': param_eval(params.lgbm__is_unbalanced),
         'scale_pos_weight': param_eval(params.lgbm__scale_pos_weight),
-        'verbose': param_eval(params.verbose)
+        'verbose': param_eval(params.verbose),
+        'callback_on': param_eval(params.lgbm__callback_on)
     },
     'catboost': {
         'loss_function': param_eval(params.catboost__loss_function),
@@ -169,16 +142,19 @@ SOLUTION_CONFIG = AttrDict({
                 'dropout': param_eval(params.nn__dropout),
                 'batch_norm': param_eval(params.nn__batch_norm),
                 'l1': param_eval(params.nn__l1),
-                'l2': param_eval(params.nn__l2)},
-                'optimizer_params': {'lr': param_eval(params.nn__learning_rate),
+                'l2': param_eval(params.nn__l2)
+            },
+            'optimizer_params': {
+                'lr': param_eval(params.nn__learning_rate),
                 'beta_1': param_eval(params.nn__beta_1),
-                'beta_2': param_eval(params.nn__beta_2)}
-            },
-            'training_config': {
-                'epochs': param_eval(params.nn__epochs),
-                'batch_size': param_eval(params.nn__batch_size)
-            },
-            'callbacks_config': {},
+                'beta_2': param_eval(params.nn__beta_2)
+            }
+        },
+        'training_config': {
+            'epochs': param_eval(params.nn__epochs),
+            'batch_size': param_eval(params.nn__batch_size)
+        },
+        'callbacks_config': {},
     },
 
     'svc': {

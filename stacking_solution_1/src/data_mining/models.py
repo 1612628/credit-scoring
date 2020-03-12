@@ -19,8 +19,8 @@ from keras.layers import Dense, Activation, BatchNormalization, Dropout
 from keras.regularizers import l1_l2
 from keras.optimizers import Adam, SGD
 
-from .utils import get_logger
-from .callbacks import neptune_monitor_lgbm, NeptuneMonitor 
+from ..common.utils import get_logger
+from ..common.callbacks import neptune_monitor_lgbm, NeptuneMonitor 
 
 
 logger = get_logger()
@@ -33,7 +33,9 @@ def callbacks(channel_prefix):
 def get_sklearn_classifier(ClassifierClass, **kwargs):
   class SklearnBinaryClassifier(SklearnClassifier):
     def transform(self, X, y=None, target=1, **kwargs):
+      logger.info(f'fit.')
       pred = self.estimator.predict_proba(X)[:, target]
+      logger.info(f'done fit.')
       return {'prediction': pred}
   
   return SklearnBinaryClassifier(ClassifierClass(**kwargs))
@@ -43,7 +45,7 @@ class XGBoost(BaseTransformer):
     super().__init__()
     logger.info('initializing XGBoost ...')
     self.params_ = params
-    self.training_params_ = ['nrounds', ['early_stopping_rounds']]
+    self.training_params_ = ['nrounds', 'early_stopping_rounds']
     self.evaluation_function_ = None
   
   @property
@@ -59,7 +61,7 @@ class XGBoost(BaseTransformer):
     })
 
   def fit(self, X, y, X_dev, y_dev, **kwargs):
-    
+    logger.info('XGBoost, fit.')
     train = xgb.DMatrix(X, 
                         label=y)
 
@@ -74,13 +76,17 @@ class XGBoost(BaseTransformer):
                                num_boost_round=self.training_config.nrounds,
                                early_stopping_rounds=self.training_config.early_stopping_rounds, 
                                verbose_eval=self.model_config.verbose,
+ 
                                feval=self.evaluation_function_)
+    logger.info('XGBoost, done fit.')
     return self
   
-  def transform(self, X):
+  def transform(self, X, **kwargs):
+    logger.info('XGBoost, transform.')
     X_DMatrix = xgb.DMatrix(X)
 
     pred = self.estimator_.predict(X_DMatrix)
+    logger.info('XGBoost, done transform.')
     return {'prediction':pred}
   
   def load(self, filepath):
@@ -117,19 +123,19 @@ class LightGBM(BaseTransformer):
     })
   
   def fit(self, X, y, X_dev, y_dev, **kwargs):
-    
+    logger.info('LightGBM, fit.')
     evaluation_results = {}
 
     self._check_target_shape_and_type(y, 'y')
     self._check_target_shape_and_type(y_dev, 'y_dev')
 
     y = self._format_target(y)
-    y_dev = self._format_target(y)
+    y_dev = self._format_target(y_dev)
 
-    logger.info(f'LightGBM, training data shape {X.shape}')
-    logger.info(f'LightGBM, dev data shape {X_dev.shape}')
-    logger.info(f'LightGBM, training label shape {y.shape}')
-    logger.info(f'LightGBM, dev label shape {y_dev.shape}')
+    logger.info(f'LightGBM, Training data shape: {X.shape}')
+    logger.info(f'LightGBM, Dev data shape: {X_dev.shape}')
+    logger.info(f'LightGBM, Training label shape: {y.shape}')
+    logger.info(f'LightGBM, Dev label shape: {y_dev.shape}')
 
     data_train = lgb.Dataset(data=X, 
                              label=y,
@@ -137,8 +143,7 @@ class LightGBM(BaseTransformer):
     data_dev = lgb.Dataset(data=X_dev, 
                            label=y_dev, 
                            **kwargs)
-
-    self.estimator = lgb.train(params=self.model_config, 
+    self.estimator_ = lgb.train(params=self.model_config, 
                                train_set=data_train, 
                                num_boost_round=self.training_config.number_boosting_rounds,
                                valid_sets=[data_train, data_dev],
@@ -150,11 +155,13 @@ class LightGBM(BaseTransformer):
                                callbacks=self.callbacks_,
                                **kwargs
                                )
-    
+    logger.info('LightGBM, done fit.') 
     return self
   
-  def transform(self, X):
+  def transform(self, X, **kwargs):
+    logger.info('LightGBM, transform.')
     pred = self.estimator_.predict(X)
+    logger.info('LightGBM, done transform.')
     return {'prediction':pred}
   
   def load(self, filepath):
@@ -170,10 +177,10 @@ class LightGBM(BaseTransformer):
           f'"target" must be "numpy.ndarray" or "pandas.Series" or "list", got {type(target)} instead.'
       )
     try:
-      assert len(target.shape) == 1, f'"{name}" must 1-D. It is {len(target.shape)} instead.'
+      assert len(target.shape) == 1, f'"{name}" must 1-D. It is {target.shape} instead.'
     except:
-      print(f'Cannot determine the shape of {name}.\n \
-            Type must be "numpy.ndarray" or "pandas.Series" or "list", got {type(target)} instead.')
+      print(f'Cannot determine the shape of {name}.\n\
+      Type must be "numpy.ndarray" or "pandas.Series" or "list", got {type(target)} and {target.shape} instead.')
     
   def _format_target(self, target):
     if isinstance(target, pd.Series):
@@ -193,7 +200,8 @@ class CatBoost(BaseTransformer):
     self.estimator_ = ctb.CatBoostClassifier(**kwargs)
   
   def fit(self, X, y, X_dev, y_dev, **kwargs):
-    
+    logger.info(f'CatBoost, fit') 
+
     logger.info(f'CatBoost, training data shape {X.shape}')
     logger.info(f'CatBoost, dev data shape {X_dev.shape}')
     logger.info(f'CatBoost, training label shape {y.shape}')
@@ -203,10 +211,13 @@ class CatBoost(BaseTransformer):
                        y,
                        eval_set=[(X, y),(X_dev, y_dev)],
                        )
+    logger.info(f'CatBoost, done fit') 
     return self
   
-  def transform(self, X):
-    pred = self.estimator_.predict_proba(X)
+  def transform(self, X, **kwargs):
+    logger.info(f'CatBoost, transform') 
+    pred = self.estimator_.predict_proba(X)[:,1]
+    logger.info(f'CatBoost, done transform') 
     return {'prediction':pred}
   
   def load(self, filepath):
@@ -218,8 +229,8 @@ class CatBoost(BaseTransformer):
 
 
 class NeuralNetwork(ClassifierXY):
-  def __init__(self, architecture_config, training_config, callback_config, **kwargs):
-    super().__init__(architecture_config, training_config, callback_config)
+  def __init__(self, architecture_config, training_config, callbacks_config, **kwargs):
+    super().__init__(architecture_config, training_config, callbacks_config)
     logger.info('initializing NeuralNetwork ...')
     self.params_ = kwargs
     self.name_= 'NeuralNetwork{}'.format(kwargs['suffix'])
@@ -236,10 +247,10 @@ class NeuralNetwork(ClassifierXY):
     K.clear_session()
     model = Sequential()
     for layer in range(self.model_params_['layers']):
-      config = {key: val[layer] for key, val in self.model_params_.items() if key != 'layer'}
+      config = {key: val[layer] for key, val in self.model_params_.items() if key != 'layers'}
       if layer == 0:
         model.add(Dense(config['neurons'],
-                        kernel_regularizer=l1_l2(l1=config['l1'], l2=config['l2']),
+                        kernel_regularizer=l1_l2(l1=float(config['l1']), l2=float(config['l2'])),
                         input_shape=input_shape
                         ))
       else:
@@ -254,7 +265,7 @@ class NeuralNetwork(ClassifierXY):
     return model
   
   def _compile_model(self, input_shape):
-    model = self._build_model(self.model_params_)
+    model = self._build_model(input_shape)
     optimizer = self._build_optimizer()
     loss = self._build_loss()
     model.compile(optimizer=optimizer, loss=loss)
@@ -265,18 +276,22 @@ class NeuralNetwork(ClassifierXY):
     return [neptune]
   
   def fit(self, X, y, X_dev, y_dev, *args, **kwargs):
+    logger.info(f'Neural network, fit') 
     self.callbacks_ = self._create_callbacks()
-    self.model_ = self._compile_model(input_shape=(X.shape[1],))
+    self.model = self._compile_model(input_shape=(X.shape[1], ))
     
-    self.model_.fit(X,
+    self.model.fit(X,
                     y,
                     validation_data=(X_dev, y_dev),
                     verbose=1,
                     callbacks=self.callbacks_,
                     **self.training_config)
+    logger.info(f'Neural network, done fit') 
     return self
   
-  def transform(self, X):
-    pred = self.model_.predict(X, verbose=1)
-    return {'predicted': np.array([x[0] for x in pred])}
+  def transform(self, X, **kwargs):
+    logger.info(f'Neural network, transform') 
+    pred = self.model.predict(X, verbose=1)
+    logger.info(f'Neural network, done transform') 
+    return {'prediction': np.array([x[0] for x in pred])}
   

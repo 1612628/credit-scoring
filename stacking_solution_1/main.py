@@ -1,6 +1,6 @@
 import click
 
-from src.pipeline_manager import PipelineManager
+from src.data_mining.pipeline_manager import PipelineManager
 
 pipeline_manager = PipelineManager()
 

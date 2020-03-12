@@ -31,9 +31,9 @@ def neural_network_pipeline(so_config, suffix=''):
 
     return nn
 
-def sklearn_pipeline(ClassifierClass, clf_name, so_config, suffix=''):
+def sklearn_pipeline(so_config, ClassifierClass, clf_name, suffix=''):
    
-    sklearn_clf =  blocks.sklearn_clf_block(ClassifierClass, clf_name, so_config, suffix)
+    sklearn_clf =  blocks.sklearn_clf_block(ClassifierClass, clf_name, so_config, suffix=suffix)
 
     return sklearn_clf
 
@@ -55,7 +55,8 @@ PIPELINES = {
     'XGBoost': xgboost_pipeline,
     'NeuralNetwork':neural_network_pipeline,
     'RandomForest': partial(sklearn_pipeline, ClassifierClass=RandomForestClassifier, clf_name='random_forest'),
-    'SVC': partial(sklearn_pipeline, ClassifierClass=SVC, clf_name='scv'),
-    'LogisticRegression': partial(sklearn_pipeline, ClassifierClass=LogisticRegression, clf_name='logistic_reg'),
+    'SVC': partial(sklearn_pipeline, ClassifierClass=SVC, clf_name='svc'),
+    'LogisticRegression': partial(sklearn_pipeline, ClassifierClass=LogisticRegression, clf_name='log_reg'),
+    'NaiveBayes': partial(sklearn_pipeline, ClassifierClass=BernoulliNB, clf_name='naive_bayes'),
     'StackingSolution1': stacking_solution_1
 }

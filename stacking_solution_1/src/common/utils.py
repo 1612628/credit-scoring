@@ -42,7 +42,7 @@ def init_logger():
   """
   Create a new or get a current logger and set default attributes
   """
-  logger = logging.getLogger('kapala-credit-sccoring')
+  logger = logging.getLogger('kapala-credit-scoring')
   logger.setLevel(logging.INFO)
   mess_format = logging.Formatter(fmt='%(asctime)s %(name)s >>> %(message)s', datefmt='%Y-%m-%d %H-%M-%S')
 
@@ -95,84 +95,6 @@ def persist_evaluation_preds(experiment_dir, y_pred, raw_data, id_col, target_co
 def set_seed(seed=31):
   random.seed(seed)
   np.random.seed(seed)
-
-def calc_rank(preds):
-  return (1 + preds.rank().values) / (1+ preds.shape[0])
-
-def chunk_groups(groupby_obj, chunk_size):
-  """
-  """
-  n_groups = groupby_obj.ngroups
-  group_chunk, idx_chunk = [], []
-  for i, (idx, df) in enumerate(groupby_obj):
-    group_chunk.append(df)
-    idx_chunk.append(idx)
-
-    if ((i+1) % chunk_size == 0) or (i + 1 == n_groups):
-      group_chunk_, idx_chunk_ = group_chunk.copy(), idx_chunk.copy()
-      group_chunk, idx_chunk = [], []
-      yield group_chunk_, idx_chunk_
-
-def parallel_apply(groups, func, idx_name='Index', num_worker=1, chunk_size=100000):
-  """
-  """
-  n_chunks = np.ceil(1.0 * groups.ngroups / chunk_size)
-  indices, features = [], []
-  for idx_chunk, groups_chunk in tqdm(chunk_groups(groups, chunk_size), total=n_chunks):
-    with mp.pool.Pool(num_worker) as executor:
-      features_chunk = executor.map(func, groups_chunk)
-    features.extend(features_chunk)
-    indices.extend(idx_chunk)
-  
-  features = pd.DataFrame(features)
-  features.index = indices
-  features.index.name = idx_name
-  return features
-
-def read_oof_preds(preds_dir, train_filepath, id_col, target_col):
-  """
-  """
-  labels = pd.read_csv(train_filepath, usecols=[id_col, target_col])
-
-  filepaths_train, filepaths_test = [], []
-
-  for filepath in sorted(glob.glob(f'{preds_dir}/*')):
-    if filepath.endswith('__oof_train.csv'):
-      filepaths_train.append(filepath)
-    elif filepath.endswith('__oof_test.csv'):
-      filepaths_test.append(filepath)
-  
-  train_dfs = []
-  for filepath in filepaths_train:
-    train_dfs.append(pd.read_csv(filepath))
-  train_dfs = reduce(lambda df1,df2: pd.merge(df1,df2, on=[id_col, 'fold_id']), train_dfs)
-  train_dfs.columns = _clean_columns(train_dfs, keep_colnames=[id_col, 'fold_id'], filepaths=filepaths_train)
-  train_dfs = pd.merge(train_dfs, labels, on=[id_col])
-
-  test_dfs = []
-  for filepath in filepaths_test:
-    test_dfs.append(pd.read_csv(filepath))
-  test_dfs = reduce(lambda df1,df2: pd.merge(df1,df2, on=[id_col, 'fold_id']), test_dfs)
-  test_dfs.columns = _clean_columns(test_dfs, keep_colnames=[id_col, 'fold_id'], filepaths=filepaths_test)
-  test_dfs = pd.merge(test_dfs, labels, on=[id_col])
-
-  return train_dfs, test_dfs
-
-def _clean_columns(df, keep_colnames, filepaths):
-  """
-  """
-  new_colnames = keep_colnames
-  features_colnames = df.drop(keep_colnames, axis=1).columns
-  for i, colname in enumerate(features_colnames):
-    model_name = filepaths[i].split('/')[-1].split('.')[0].replace('__oof_train','').replace('__oof_test','')
-    new_colnames.append(model_name)
-  return new_colnames
-
-def safe_div(a, b):
-  try:
-    return float(a) / float(b)
-  except:
-    return 0.0
 
 def flatten_list(l):
   return [item for sublist in l for item in sublist]
