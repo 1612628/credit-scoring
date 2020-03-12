@@ -1,22 +1,3 @@
-project: kapala-credit-scoring
-
-name: kapala-credit-scoring
-tag: [solution-1, stacking]
-
-metric:
-  channel: 'ROC_AUC'
-  goal: maximize
-
-exclude:
-  - output
-  - notebooks
-  - neptune.log
-  - offline_job.log
-  - .git
-  - .github
-  - .idea
-  - .ipynb_checkpoints
-
 parameters:
 # Data
   train_filepath: './input/train_input_imputed.csv'

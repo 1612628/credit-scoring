@@ -54,15 +54,12 @@ def init_logger():
 
   return logger
 
-def read_params(ctx, fallback_file):
+def read_params(fallback_file):
   """
   Read parameters from ctx or config file
   """
-  if ctx.params.__class__.__name__ == 'OfflineContextParams':
-    neptune_config = read_yaml(fallback_file)
-    params = neptune_config.parameters
-  else:
-    params = ctx.params
+  config = read_yaml(fallback_file)
+  params = config.parameters
   
   return params
 

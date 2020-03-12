@@ -1,12 +1,10 @@
 # pipeline_config
 
 from attrdict import AttrDict
-from deepsense import neptune
 
 from ..common.utils import read_params, param_eval
 
-ctx = neptune.Context()
-params = read_params(ctx, fallback_file='./credit-scoring/stacking_solution_1/configs/neptune.yaml')
+params = read_params(fallback_file='./credit-scoring/stacking_solution_1/configs/config.yaml')
 
 RANDOM_SEED = 90310
 DEV_SAMPLE_SIZE = 500

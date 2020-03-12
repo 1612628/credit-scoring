@@ -7,7 +7,6 @@ from attrdict import AttrDict
 import numpy as np
 import pandas as pd
 from scipy.stats import gmean
-from deepsense import neptune
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split, KFold, StratifiedKFold
 import gc
@@ -20,8 +19,8 @@ from ..common.custom_plot import CSPlot
 
 set_seed(config.RANDOM_SEED)
 logger = init_logger()
-ctx = neptune.Context()
-params = read_params(ctx, fallback_file='./credit-scoring/stacking_solution_1/configs/neptune.yaml')
+params = read_params(fallback_file='./credit-scoring/stacking_solution_1/configs/config.yaml')
+
 
 
 
@@ -114,7 +113,6 @@ def evaluate(pipeline_name, dev_mode, tag):
     logger.info('Calculating AUC on dev set')
     auc_score = roc_auc_score(dev_set[config.TARGET_COL], y_pred)
     logger.info(f'ROC AUC score on dev set {auc_score}')
-    ctx.channel_send('Evaluate, ROC_AUC',0, auc_score)
     logger.info(f'Done EVALUATION')
 
 def predict_and_submit(pipeline_name, suffix, is_submit=False):

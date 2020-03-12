@@ -20,15 +20,10 @@ from keras.regularizers import l1_l2
 from keras.optimizers import Adam, SGD
 
 from ..common.utils import get_logger
-from ..common.callbacks import neptune_monitor_lgbm, NeptuneMonitor 
 
 
 logger = get_logger()
 ctx = neptune.Context()
-
-def callbacks(channel_prefix):
-  neptune_monitor = neptune_monitor_lgbm(channel_prefix)
-  return [neptune_monitor]
 
 def get_sklearn_classifier(ClassifierClass, **kwargs):
   class SklearnBinaryClassifier(SklearnClassifier):
@@ -105,10 +100,6 @@ class LightGBM(BaseTransformer):
     self.params_ = params
     self.training_params_ = ['number_boosting_rounds','early_stopping_rounds']
     self.evaluation_function_ = None
-    if params['callback_on']:
-      self.callbacks_ = callbacks(channel_prefix=name)
-    else:
-      self.callbacks_ = []
   
   @property
   def model_config(self):
@@ -152,7 +143,6 @@ class LightGBM(BaseTransformer):
                                early_stopping_rounds=self.training_config.early_stopping_rounds,
                                evals_result=evaluation_results,
                                verbose_eval=self.model_config.verbose,
-                               callbacks=self.callbacks_,
                                **kwargs
                                )
     logger.info('LightGBM, done fit.') 
@@ -271,20 +261,14 @@ class NeuralNetwork(ClassifierXY):
     model.compile(optimizer=optimizer, loss=loss)
     return model
   
-  def _create_callbacks(self, **kwargs):
-    neptune = NeptuneMonitor(self.name_)
-    return [neptune]
-  
   def fit(self, X, y, X_dev, y_dev, *args, **kwargs):
     logger.info(f'Neural network, fit') 
-    self.callbacks_ = self._create_callbacks()
     self.model = self._compile_model(input_shape=(X.shape[1], ))
     
     self.model.fit(X,
                     y,
                     validation_data=(X_dev, y_dev),
                     verbose=1,
-                    callbacks=self.callbacks_,
                     **self.training_config)
     logger.info(f'Neural network, done fit') 
     return self
