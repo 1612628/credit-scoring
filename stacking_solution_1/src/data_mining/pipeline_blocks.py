@@ -8,6 +8,7 @@ from sklearn.linear_model import LogisticRegression
 from .models import get_sklearn_classifier, XGBoost, LightGBM, NeuralNetwork,CatBoost
 
 def lightgbm_block(so_config, suffix, **kwargs):
+
   model_name = f'light_gbm{suffix}'
   
   light_gbm = Step(name=model_name,
@@ -19,6 +20,7 @@ def lightgbm_block(so_config, suffix, **kwargs):
   return light_gbm
 
 def catboost_block(so_config, suffix, **kwargs):
+
   model_name = f'catboost{suffix}'
 
   catboost = Step(name=model_name,
@@ -30,6 +32,7 @@ def catboost_block(so_config, suffix, **kwargs):
   return catboost
 
 def xgboost_block(so_config, suffix, **kawrgs):
+
   model_name = f'xgboost{suffix}'
 
   xgboost = Step(name=model_name,
@@ -41,6 +44,7 @@ def xgboost_block(so_config, suffix, **kawrgs):
   return xgboost
 
 def neural_network_block(so_config, suffix, **kwargs):
+
   model_name = f'neural_network{suffix}'
 
   nn = Step(name=model_name,
@@ -52,6 +56,7 @@ def neural_network_block(so_config, suffix, **kwargs):
   return nn
 
 def sklearn_clf_block(ClassifierClass, clf_name, so_config, suffix, **kawrgs):
+
   model_name = f'{clf_name}{suffix}'
 
   model_params = getattr(so_config, clf_name)
@@ -65,7 +70,11 @@ def sklearn_clf_block(ClassifierClass, clf_name, so_config, suffix, **kawrgs):
   return sklearn_clf
 
 def stacking_solution_1(so_config, suffix, ClassifierClass_tuple_list):
-  
+  """
+  There are 2 layers:
+    Layer_1: lightgbm, catboost, xgboost, nn, some of sklearn classifier
+    Layer_2: LogisticRegression
+  """
   lightgbm_step = lightgbm_block(so_config, suffix)
   catboost_step = catboost_block(so_config, suffix)
   xgboost_step = xgboost_block(so_config, suffix)
@@ -98,7 +107,7 @@ def stacking_solution_1(so_config, suffix, ClassifierClass_tuple_list):
 
   return ensemble_step
 
-# ++
+
 
 
 

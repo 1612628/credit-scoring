@@ -36,6 +36,7 @@ def get_sklearn_classifier(ClassifierClass, **kwargs):
   return SklearnBinaryClassifier(ClassifierClass(**kwargs))
 
 class XGBoost(BaseTransformer):
+
   def __init__(self, **params):
     super().__init__()
     logger.info('initializing XGBoost ...')
@@ -45,12 +46,14 @@ class XGBoost(BaseTransformer):
   
   @property
   def model_config(self):
+
     return AttrDict({
         param: value for param, value in self.params_.items() if param not in self.training_params_
     })
   
   @property
   def training_config(self):
+
     return AttrDict({
         param: value for param, value in self.params_.items() if param in self.training_params_
     })
@@ -94,6 +97,7 @@ class XGBoost(BaseTransformer):
   
 
 class LightGBM(BaseTransformer):
+
   def __init__(self, name=None, **params):
     super().__init__()
     logger.info('initializing LightGBM ...')
@@ -186,6 +190,7 @@ class LightGBM(BaseTransformer):
 
 
 class CatBoost(BaseTransformer):
+
   def __init__(self, **kwargs):
     self.estimator_ = ctb.CatBoostClassifier(**kwargs)
   
@@ -219,6 +224,7 @@ class CatBoost(BaseTransformer):
 
 
 class NeuralNetwork(ClassifierXY):
+  
   def __init__(self, architecture_config, training_config, callbacks_config, **kwargs):
     super().__init__(architecture_config, training_config, callbacks_config)
     logger.info('initializing NeuralNetwork ...')

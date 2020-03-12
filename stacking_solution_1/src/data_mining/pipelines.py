@@ -38,6 +38,11 @@ def sklearn_pipeline(so_config, ClassifierClass, clf_name, suffix=''):
     return sklearn_clf
 
 def stacking_solution_1(so_config, suffix=''):
+    """
+    There are 2 layers:
+      Layer_1: lightgbm, catboost, xgboost, nn, svc, random_forest, logistic, naive_bayes
+      Layer_2: LogisticRegression
+    """
     classifierclass_tupe_list=[
         (SVC, 'svc'),
         (RandomForestClassifier, 'random_forest'),

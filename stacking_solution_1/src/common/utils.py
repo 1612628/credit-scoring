@@ -21,7 +21,7 @@ def create_submission(data, id_name, label_name, label_preds):
   """
   Creating submission pandas dataframe for submitting
   """
-  return pd.DataFrame({id_name:data.index.tolist(),
+  return pd.DataFrame({id_name:[idx+30000 for idx in data.index.tolist()],
                        label_name: label_preds})
 
 def verify_submission(submission, sample_submission):
