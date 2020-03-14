@@ -33,40 +33,39 @@ parameters:
   lgbm__boosting_type: goss
   lgbm__objective: binary
   lgbm__metric: auc
-  lgbm__number_boosting_rounds: 500
-  lgbm__early_stopping_rounds: 50
+  lgbm__number_boosting_rounds: 100
+  lgbm__early_stopping_rounds: 20
   lgbm__learning_rate: 0.1
-  lgbm__max_bin: 300
-  lgbm__max_depth: 4
-  lgbm__num_leaves: 644
-  lgbm__min_child_samples: 330
+  lgbm__max_bin: 500
+  lgbm__max_depth: 12
+  lgbm__num_leaves: 30
+  lgbm__min_child_samples: 50
   lgbm__subsample: 1.0
   lgbm__subsample_freq: 1
-  lgbm__colsample_bytree: 0.377
-  lgbm__min_gain_to_split: 3.405
-  lgbm__reg_lambda: 0.0
-  lgbm__reg_alpha: 0.0
+  lgbm__colsample_bytree: 1.0
+  lgbm__min_gain_to_split: 0.0
+  lgbm__lambda_l1: 0.0
+  lgbm__lambda_l2: 0.0
   lgbm__is_unbalanced: True
   lgbm__scale_pos_weight: 1.
-  lgbm__callback_on: False
   
 # Catboost
   catboost__loss_function: Logloss
   catboost__eval_metric: AUC
-  catboost__iterations: 1000
+  catboost__iterations: 50
   catboost__learning_rate: 0.05
   catboost__depth: 6
-  catboost__l2_leaf_reg: 3
-  catboost__border_count: 128
+  catboost__l2_leaf_reg: 2
+  catboost__border_count: 150 
   catboost__model_size_reg: 0.5
   catboost__colsample_bylevel: 1.0
   catboost__max_ctr_complexity: 1
   catboost__od_type: 'Iter'
-  catboost__od_wait: 100
+  catboost__od_wait: 30 
 
 # XGBoost
   xgb__booster: gbtree
-  xgb__tree_method: hist # gpu_hist  # auto  hist
+  xgb__tree_method: exact # gpu_hist  # auto  hist
   xgb__objective: binary:logistic
   xgb__eval_metric: auc
   xgb__nrounds: 500
@@ -76,12 +75,11 @@ parameters:
   xgb__max_depth: 2
   xgb__max_bin: 300
   xgb__subsample: 0.8
-  xgb__colsample_bytree: 0.3
   xgb__colsample_bylevel: 1
-  xgb__min_child_weight: 9
-  xgb__lambda: 0
-  xgb__alpha: 100
-  xgb__scale_pos_weight: 1
+  xgb__min_child_weight: 3
+  xgb__lambda: 2
+  xgb__alpha: 10
+  xgb__scale_pos_weight: 60.7
 
 # Neural Network
   nn__layers: 2
@@ -91,30 +89,30 @@ parameters:
   nn__batch_norm: '[True, False]'
   nn__l1: '[0., 0.]'
   nn__l2: '[0., 0.]'
-  nn__learning_rate: 0.001
+  nn__learning_rate: 0.01
   nn__beta_1: 0.9
   nn__beta_2: 0.99
   nn__epochs: 10
   nn__batch_size: 32
 
 # Random forest
-  rf__n_estimators: 200
+  rf__n_estimators: 50
   rf__criterion: gini
-  rf__max_features: 0.2
-  rf__max_depth: 40
-  rf__min_samples_split: 50
-  rf__min_samples_leaf: 20
-  rf__max_leaf_nodes: 60
+  rf__max_features: 1
+  rf__max_depth: 20
+  rf__min_samples_split: 10
+  rf__min_samples_leaf: 10 
+  rf__max_leaf_nodes: 3 
   rf__class_weight: balanced
 
 # Logistic regression
-  lr__penalty: l1
-  lr__tol: 0.00001
-  lr__C: 0.1
-  lr__fit_intercept: 1
+  lr__penalty: l2
+  lr__tol: 1e-4
+  lr__C: 0.5
+  lr__fit_intercept: True
   lr__class_weight: balanced
-  lr__solver: liblinear
-  lr__max_iter: 500
+  lr__solver: saga
+  lr__max_iter: 100
 
 # SVC
   svc__kernel: rbf
@@ -123,7 +121,7 @@ parameters:
   svc__gamma: auto
   svc__coef0: 0.0
   svc__probability: True
-  svc__tol: 0.00001
+  svc__tol: 1e-4
   svc__max_iter: -1
 
 # Naive Bayes

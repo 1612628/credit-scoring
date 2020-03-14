@@ -25,68 +25,39 @@ params = read_params(fallback_file='./credit-scoring/stacking_solution_1/configs
 
 
 class PipelineManager:
-    def train(self, pipeline_name, dev_mode, tag, full_dataset=False):
-        train(pipeline_name, dev_mode, tag, full_dataset)
+    def train(self, pipeline_name, data_dev_mode, tag):
+        self.clf = train(pipeline_name, data_dev_mode, tag)
     
-    def evaluate(self, pipeline_name, dev_mode, tag):
-        evaluate(pipeline_name, dev_mode, tag)
+    def evaluate(self, pipeline_name, data_dev_mode, tag):
+        evaluate(pipeline_name, data_dev_mode, tag, self.clf)
     
     def predict(self, pipeline_name, tag, is_submit):
-        predict_and_submit(pipeline_name, tag, is_submit)
+        predict_and_submit(pipeline_name, tag, self.clf, is_submit)
     
-
-def train(pipeline_name, dev_mode,  tag, full_dataset=False):
+def train(pipeline_name, data_dev_mode, tag):
     logger.info('TRAINING...')
+    
     if bool(params.clean_experiment_directory_before_training) and os.path.isdir(params.experiment_dir):
         logger.info('Cleaning experiment directory...')
         shutil.rmtree(params.experiment_dir)
     
-    data = _read_data(dev_mode)
+    data = _read_data(data_dev_mode)
+    train_set = data['train']
+    logger.info(f'Train shape: {train_set.shape}')
 
-    logger.info('Shuffling and spliting into train and dev ...')
-    train_set, dev_set = train_test_split(data['train'],
-                                                     test_size=params.dev_size,
-                                                     random_state=config.RANDOM_SEED,
-                                                     shuffle=params.shuffle)
-    if full_dataset:
-        logger.info('Training full dataset.')
-        train_set = data['train']
-        logger.info(f'Train shape: {train_set.shape}')
-    else:
-        logger.info(f'Train shape: {train_set.shape}')
-        logger.info(f'Dev shape: {dev_set.shape}')
-    
-    train_data = {
-        'input':{
-            'X': train_set.drop(columns=config.TARGET_COL),
-            'y': train_set[config.TARGET_COL].values.reshape(-1),
-            'X_dev': dev_set.drop(columns=config.TARGET_COL),
-            'y_dev': dev_set[config.TARGET_COL].values.reshape(-1)
-        }
-    }
     pipeline = PIPELINES[pipeline_name](so_config = config.SOLUTION_CONFIG, suffix=tag)
 
-    pipeline.clean_cache_step()
-    logger.info('Start pipeline fit and transform')
-    train_preds = pipeline.fit_transform(train_data)['prediction']
-    if not full_dataset:
-        dev_data = {
-            'input':{
-                'X': dev_set.drop(columns=config.TARGET_COL),
-                'y': dev_set[config.TARGET_COL].values.reshape(-1)
-            }
-        }
-        dev_preds = pipeline.transform(dev_data)['prediction']
-        CSPlot.plot_auc_all(train_set[config.TARGET_COL], train_preds, 
-                            dev_set[config.TARGET_COL], dev_preds)
-    pipeline.clean_cache_step()
+    logger.info('Start pipeline fit')
+    clf = pipeline.fit(train_set.drop(columns=config.TARGET_COL), train_set[config.TARGET_COL].values.reshape(-1))
+
     logger.info('DONE TRAINING...')
 
+    return clf
 
-def evaluate(pipeline_name, dev_mode, tag):
+def evaluate(pipeline_name, data_dev_mode, tag, classifier):
     logger.info('EVALUATION...')
-
-    data = _read_data(dev_mode)
+    
+    data = _read_data(data_dev_mode)
 
     logger.info('Shuffling and spliting into train and dev ...')
     _ , dev_set = train_test_split(data['train'],
@@ -95,43 +66,31 @@ def evaluate(pipeline_name, dev_mode, tag):
                                    shuffle=params.shuffle)
     logger.info(f'Dev shape: {dev_set.shape}')
 
-    dev_data = {
-        'input':{
-            'X': dev_set.drop(columns=config.TARGET_COL),
-            'y': dev_set[config.TARGET_COL].values.reshape(-1)
-        }
-    }
-
-    pipeline = PIPELINES[pipeline_name](config.SOLUTION_CONFIG, suffix=tag)
-    pipeline.clean_cache_step()
+    pipeline = classifier 
     logger.info('Start pipeline transform')
-    output = pipeline.transform(dev_data)
-    pipeline.clean_cache_step()
+    output = pipeline.transform(dev_set)
 
-    y_pred = output['prediction']
+    y_pred = output
 
     logger.info('Calculating AUC on dev set')
     auc_score = roc_auc_score(dev_set[config.TARGET_COL], y_pred)
     logger.info(f'ROC AUC score on dev set {auc_score}')
     logger.info(f'Done EVALUATION')
 
-def predict_and_submit(pipeline_name, suffix, is_submit=False):
+def predict_and_submit(pipeline_name, suffix, classifier, is_submit=False):
     logger.info('PREDICT...')
     
     data = _read_data(False)
 
+    # train_set = data['train']
     test_set = data['test']
 
-    test_data = {
-        'input': {
-            'X': test_set,
-            'y': None
-        }
-    }
-    pipeline = PIPELINES[pipeline_name](so_config=config.SOLUTION_CONFIG, suffix=suffix)
-    pipeline.clean_cache_step()
-    y_preds = pipeline.transform(test_data)['prediction']
-    pipeline.clean_cache_step()
+    pipeline = classifier 
+    logger.info('Start pipeline transform')
+    
+    # pipeline.fit(train_set.drop(columns=config.TARGET_COL), train_set[config.TARGET_COL].values.reshape(-1))
+    y_preds = pipeline.transform(test_set).reshape(-1)
+   
     if is_submit:
         logger.info('Creating submission...')
         submission = create_submission(test_set, config.ID_COL[0], config.TARGET_COL[0], y_preds)
@@ -142,9 +101,9 @@ def predict_and_submit(pipeline_name, suffix, is_submit=False):
         logger.info(f'submission.csv is pesisted to {submission_filepath}')
     logger.info('DONE PREDICT') 
 
-def _read_data(dev_mode):
+def _read_data(data_dev_mode):
     logger.info('Reading data...')
-    if dev_mode:
+    if data_dev_mode:
         nrows = config.DEV_SAMPLE_SIZE
         logger.info(f'Running in "dev-mode" with sample size of {nrows}')
     else:
@@ -164,3 +123,4 @@ def _read_data(dev_mode):
 
     logger.info('Reading done!')
     return raw_data
+

@@ -52,12 +52,12 @@ SOLUTION_CONFIG = AttrDict({
         'subsample_freq': param_eval(params.lgbm__subsample_freq),
         'colsample_bytree': param_eval(params.lgbm__colsample_bytree),
         'min_gain_to_split': param_eval(params.lgbm__min_gain_to_split),
-        'reg_lambda': param_eval(params.lgbm__reg_lambda),
-        'reg_alpha': param_eval(params.lgbm__reg_alpha),
+        'lambda_l1': param_eval(params.lgbm__lambda_l1),
+        'lambda_l2': param_eval(params.lgbm__lambda_l2),
         'is_unbalanced': param_eval(params.lgbm__is_unbalanced),
         'scale_pos_weight': param_eval(params.lgbm__scale_pos_weight),
         'verbose': param_eval(params.verbose),
-        'callback_on': param_eval(params.lgbm__callback_on)
+        'random_state': RANDOM_SEED
     },
     'catboost': {
         'loss_function': param_eval(params.catboost__loss_function),
@@ -85,7 +85,6 @@ SOLUTION_CONFIG = AttrDict({
         'eta': param_eval(params.xgb__eta),
         'max_depth': param_eval(params.xgb__max_depth),
         'subsample': param_eval(params.xgb__subsample),
-        'colsample_bytree': param_eval(params.xgb__colsample_bytree),
         'colsample_bylevel': param_eval(params.xgb__colsample_bylevel),
         'min_child_weight': param_eval(params.xgb__min_child_weight),
         'lambda': param_eval(params.xgb__lambda),
