@@ -46,8 +46,6 @@ class SklearnClassifier(BaseEstimator, ClassifierMixin):
     return {'classifier':self.classifier_, 'fit_params': self.params_}
   
 
-from copy import deepcopy
-
 class LightGBM(BaseEstimator, ClassifierMixin):
 
   def __init__(self, params):

@@ -13,7 +13,6 @@ import pandas as pd
 from tqdm import tqdm
 import yaml
 from attrdict import AttrDict
-from sklearn.externals import joblib
 import sklearn.preprocessing as prep
 
 def create_submission(data, id_name, label_name, label_preds):
