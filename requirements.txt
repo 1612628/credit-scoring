@@ -4,7 +4,7 @@ attrdict
 click 
 lightgbm 
 numpy 
-scikit_learn 
+scikit-learn 
 pyyaml 
 xgboost 
 catboost 

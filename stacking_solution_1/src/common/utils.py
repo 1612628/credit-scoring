@@ -13,7 +13,6 @@ import pandas as pd
 from tqdm import tqdm
 import yaml
 from attrdict import AttrDict
-from steppy.base import BaseTransformer
 from sklearn.externals import joblib
 import sklearn.preprocessing as prep
 
