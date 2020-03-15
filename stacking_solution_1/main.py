@@ -22,6 +22,13 @@ def train(pipeline_name, dev_mode, tag):
 def evaluate(pipeline_name, dev_mode, tag):
     pipeline_manager.evaluate(pipeline_name, dev_mode, tag)
 
+@main.command()
+@main.option(param_decls='-p', show_default='--pipe-line', help='predefined pipeline to be trained', required=True)
+@main.option(param_decls='-t', show_default='--tag', help='Tagging', required=False)
+def tuning(pipeline_name, tag):
+    pipeline_manager.tunning(pipeline_name, tag)
+
+
 
 if __name__ == '__main__':
     main()
