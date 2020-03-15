@@ -67,7 +67,7 @@ def read_yaml(filepath):
   Read .yaml file in form of AttrDict for easy use and manipulation
   """
   with open(filepath) as file:
-    config = yaml.load(file)
+    config = yaml.load(file, Loader=yaml.CLoader)
   return AttrDict(config)
 
 def param_eval(param):
