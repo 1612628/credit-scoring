@@ -110,7 +110,7 @@ def hyperparameter_tunning(pipeline_name, data_dev_mode, tag):
     pipeline = PIPELINES[pipeline_name](so_config = config.SOLUTION_CONFIG, suffix=tag)
 
     logger.info('Create GridSearchCV...')
-    param_grid = add_prefix_keys(config.SOLUTION_CONFIG.tuner[pipeline_name], f'{pipeline_name}{tag}')
+    param_grid = add_prefix_keys(config.SOLUTION_CONFIG.tuner[pipeline_name], f'{pipeline_name}{tag}__')
     grid = GridSearchCV(estimator=pipeline, 
                         param_grid=param_grid,
                         verbose=1,
