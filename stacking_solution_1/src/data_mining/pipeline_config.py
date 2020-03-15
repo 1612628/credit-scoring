@@ -219,5 +219,15 @@ SOLUTION_CONFIG = AttrDict({
             'n_jobs': [param_eval(params.num_workers)],
             'class_weight': param_eval(params.tuning_rf__class_weight),
         },
+        'log_reg': {
+            'penalty': param_eval(params.tuning_lr__penalty),
+            'tol': param_eval(params.tuning_lr__tol),
+            'C': param_eval(params.tuning_lr__C),
+            'fit_intercept': param_eval(params.tuning_lr__fit_intercept),
+            'class_weight': param_eval(params.tuning_lr__class_weight),
+            'solver': param_eval(params.tuning_lr__solver),
+            'max_iter': param_eval(params.tuning_lr__max_iter),
+            'n_jobs': [param_eval(params.num_workers)],
+            },
     }
 })

@@ -182,10 +182,10 @@ parameters:
   lr__solver: saga
   lr__max_iter: 100
 # Logistic regression hyperparameters tuning
-  lr__penalty: [l2, elasticnet]
-  lr__tol: [1e-4]
-  lr__C: [0.5, 1]
-  lr__fit_intercept: [True]
-  lr__class_weight: [balanced]
-  lr__solver: [liblinear, saga]
-  lr__max_iter: [20, 50, 100]
+  tuning_lr__penalty: [l2, elasticnet]
+  tuning_lr__tol: [1e-4]
+  tuning_lr__C: [0.5, 1]
+  tuning_lr__fit_intercept: [True]
+  tuning_lr__class_weight: [balanced]
+  tuning_lr__solver: [liblinear, saga]
+  tuning_lr__max_iter: [20, 50, 100]
