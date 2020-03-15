@@ -1,0 +1,14 @@
+# Install essential library
+pandas=='0.25.1'
+steppy-toolkit --upgrade
+steppy --upgrade
+attrdict --upgrade
+click --upgrade
+lightgbm --upgrade
+numpy --upgrade
+scikit_learn --upgrade
+pyyaml --upgrade
+xgboost --upgrade
+catboost --upgrade
+scikit-optimize --upgrade
+keras --upgrade
