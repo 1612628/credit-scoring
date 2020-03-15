@@ -1,6 +1,5 @@
 # models
 from attrdict import AttrDict
-from steppy.base import BaseTransformer
 import numpy as np
 import pandas as pd
 
@@ -142,7 +141,7 @@ class XGBoost(BaseEstimator, ClassifierMixin):
   def __init__(self, params):
     logger.info('initializing XGBoost ...')
     self.params_ = params
-    self.training_params_ = ['nrounds', 'early_stopping_rounds']
+    self.training_params_ = ['num_boost_round', 'early_stopping_rounds']
     self.evaluation_function_ = None
     self.classes_ = np.array([0,1])
   
@@ -177,7 +176,7 @@ class XGBoost(BaseEstimator, ClassifierMixin):
                                dtrain=train, 
                                evals=[(train, 'train')], 
                                evals_result=evaluation_results,
-                               num_boost_round=self.training_config.nrounds,
+                               num_boost_round=self.training_config.num_boost_round,
                                early_stopping_rounds=self.training_config.early_stopping_rounds, 
                                verbose_eval=self.model_config.verbose,
                                feval=self.evaluation_function_)

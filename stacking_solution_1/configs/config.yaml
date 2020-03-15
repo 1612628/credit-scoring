@@ -4,6 +4,7 @@ parameters:
   test_filepath: './input/test_input_imputed.csv'
   first_level_oof_predictions_dir: './models/stacking_1/oof'
   experiment_dir: './models/stacking_1/exp'
+  params_dir: './models/params'
 # Data preparation
   n_cv_splits: 5
   dev_size: 0.2
@@ -47,27 +48,27 @@ parameters:
   lgbm__lambda_l1: 0.0
   lgbm__lambda_l2: 0.0
   lgbm__is_unbalanced: True
-  lgbm__scale_pos_weight: 1.
-
+  lgbm__scale_pos_weight: 60.7
 # Light GBM hyperparameters tuning
-  tunning_lgbm__boosting_type: [gbdt, rf, goss]
-  tunning_lgbm__objective: [binary]
-  tunning_lgbm__metric: [auc]
-  tunning_lgbm__number_boosting_rounds: [20, 50, 100, 200]
-  tunning_lgbm__early_stopping_rounds: [20, 50]
-  tunning_lgbm__learning_rate: [0.05, 0.1, 0.15, 0.2]
-  tunning_lgbm__max_bin: [127, 255, 511, 1023]
-  tunning_lgbm__max_depth: [8, 10, 12, 15, 20]
-  tunning_lgbm__num_leaves: [10, 15, 20, 30]
-  tunning_lgbm__min_data_in_leaf: [10, 20, 50, 100]
-  tunning_lgbm__bagging_fraction: [1.0, 0.8, 0.7]
-  tunning_lgbm__bagging_freq: [1, 10, 20]
-  tunning_lgbm__feature_fraction: [1.0, 0.8, 0.7]
-  tunning_lgbm__min_gain_to_split: [0.0]
-  tunning_lgbm__lambda_l1: [0.0, 1.0, 3.0]
-  tunning_lgbm__lambda_l2: [0.0, 1.0, 2.0]
-  tunning_lgbm__is_unbalanced: [True]
-  tunning_lgbm__scale_pos_weight: [1., 2., 4.]
+  tuning_lgbm__boosting_type: [gbdt, rf, goss]
+  tuning_lgbm__objective: [binary]
+  tuning_lgbm__metric: [auc]
+  tuning_lgbm__number_boosting_rounds: [20, 50, 100, 200]
+  tuning_lgbm__early_stopping_rounds: [20, 50]
+  tuning_lgbm__learning_rate: [0.05, 0.1, 0.15, 0.2]
+  tuning_lgbm__max_bin: [127, 255, 511, 1023]
+  tuning_lgbm__max_depth: [8, 10, 12, 15, 20]
+  tuning_lgbm__num_leaves: [10, 15, 20, 30]
+  tuning_lgbm__min_data_in_leaf: [10, 20, 50, 100]
+  tuning_lgbm__bagging_fraction: [1.0, 0.8, 0.7]
+  tuning_lgbm__bagging_freq: [1, 10, 20]
+  tuning_lgbm__feature_fraction: [1.0, 0.8, 0.7]
+  tuning_lgbm__min_gain_to_split: [0.0]
+  tuning_lgbm__lambda_l1: [0.0, 1.0, 3.0]
+  tuning_lgbm__lambda_l2: [0.0, 1.0, 2.0]
+  tuning_lgbm__is_unbalanced: [True]
+  tuning_lgbm__scale_pos_weight: [60.7]
+
 # Catboost
   catboost__loss_function: Logloss
   catboost__eval_metric: AUC
@@ -75,19 +76,28 @@ parameters:
   catboost__learning_rate: 0.05
   catboost__depth: 6
   catboost__l2_leaf_reg: 2
-  catboost__border_count: 150 
-  catboost__model_size_reg: 0.5
+  catboost__max_bin: 150 
   catboost__colsample_bylevel: 1.0
-  catboost__max_ctr_complexity: 1
   catboost__od_type: 'Iter'
   catboost__od_wait: 30 
+# Catboost hyperparameter tunning
+  tuning_catboost__loss_function: [Logloss]
+  tuning_catboost__eval_metric: [AUC]
+  tuning_catboost__iterations: [15, 20, 30, 50, 80, 110]
+  tuning_catboost__learning_rate: [0.05, 0.1, 0.15, 0.2]
+  tuning_catboost__depth: [6, 10, 13, 16, 20]
+  tuning_catboost__l2_leaf_reg: [1, 2, 3]
+  tuning_catboost__max_bin: [127, 255, 511, 1023]
+  tuning_catboost__colsample_bylevel: [1.0, 0.8, 0.7]
+  tuning_catboost__od_type: ['Iter', 'IncToDec']
+  tuning_catboost__od_wait: [30, 50]
 
 # XGBoost
   xgb__booster: gbtree
   xgb__tree_method: exact # gpu_hist  # auto  hist
   xgb__objective: binary:logistic
   xgb__eval_metric: auc
-  xgb__nrounds: 500
+  xgb__num_boost_round: 500
   xgb__early_stopping_rounds: 50
   xgb__eta: 0.1
   xgb__max_leaves: 4
@@ -99,6 +109,23 @@ parameters:
   xgb__lambda: 2
   xgb__alpha: 10
   xgb__scale_pos_weight: 60.7
+# XGBoost hyperparameter tunning
+  tuning_xgb__booster: [gbtree, dart]
+  tuning_xgb__tree_method: [exact, hist] # gpu_hist  # auto  hist
+  tuning_xgb__objective: [binary:logistic]
+  tuning_xgb__eval_metric: [auc]
+  tuning_xgb__num_boost_round: [100, 200, 300, 500]
+  tuning_xgb__early_stopping_rounds: [30, 50, 100]
+  tuning_xgb__eta: [0.1, 0.15, 0.2]
+  tuning_xgb__max_leaves: [10, 15, 20, 30]
+  tuning_xgb__max_depth: [6, 10, 13, 18]
+  tuning_xgb__max_bin: [127, 255, 511, 1023]
+  tuning_xgb__subsample: [1.0, 0.8, 0.7]
+  tuning_xgb__colsample_bylevel: [1, 0.8, 0.7]
+  tuning_xgb__min_child_weight: [3, 5, 10]
+  tuning_xgb__lambda: [1, 2, 3]
+  tuning_xgb__alpha: [1, 2, 4] 
+  tuning_xgb__scale_pos_weight: [60.7]
 
 # Neural Network
   nn__layers: 2
@@ -113,6 +140,19 @@ parameters:
   nn__beta_2: 0.99
   nn__epochs: 10
   nn__batch_size: 32
+# Neural Network hyperparameters tuning
+  tuning_nn__layers: [2]
+  tuning_nn__neurons: ['[16, 1]', '[20,1]']
+  tuning_nn__activation: ['["relu", "sigmoid"]', '["sigmoid", "sigmoid"]']
+  tuning_nn__dropout: ['[0., 0.]', '[0.3, 0.]']
+  tuning_nn__batch_norm: ['[True, False]']
+  tuning_nn__l1: ['[0., 0.]', '[1., 2.]']
+  tuning_nn__l2: ['[0., 0.]', '[1., 2.]']
+  tuning_nn__learning_rate: [0.05, 0.1, 0.15, 0.2]
+  tuning_nn__beta_1: [0.9, 0.95]
+  tuning_nn__beta_2: [0.99]
+  tuning_nn__epochs: [10, 30, 50, 100]
+  tuning_nn__batch_size: [100, 500 ,1000]
 
 # Random forest
   rf__n_estimators: 50
@@ -123,6 +163,15 @@ parameters:
   rf__min_samples_leaf: 10 
   rf__max_leaf_nodes: 3 
   rf__class_weight: balanced
+# Random forest hyperparameters tuning
+  tuning_rf__n_estimators: [15, 20, 50]
+  tuning_rf__criterion: [gini]
+  tuning_rf__max_features: [1., 0.8, 0.7]
+  tuning_rf__max_depth: [10, 15, 20]
+  tuning_rf__min_samples_split: [3, 5 ,10]
+  tuning_rf__min_samples_leaf: [2, 5, 10] 
+  tuning_rf__max_leaf_nodes: [5, 10, 20, 30] 
+  tuning_rf__class_weight: [balanced]
 
 # Logistic regression
   lr__penalty: l2
@@ -132,17 +181,11 @@ parameters:
   lr__class_weight: balanced
   lr__solver: saga
   lr__max_iter: 100
-
-# SVC
-  svc__kernel: rbf
-  svc__C: 1
-  svc__degree: 5
-  svc__gamma: auto
-  svc__coef0: 0.0
-  svc__probability: True
-  svc__tol: 1e-4
-  svc__max_iter: -1
-
-# Naive Bayes
-  nb__alpha: 1
-  nb__binarize: 0
+# Logistic regression hyperparameters tuning
+  lr__penalty: [l2, elasticnet]
+  lr__tol: [1e-4]
+  lr__C: [0.5, 1]
+  lr__fit_intercept: [True]
+  lr__class_weight: [balanced]
+  lr__solver: [liblinear, saga]
+  lr__max_iter: [20, 50, 100]

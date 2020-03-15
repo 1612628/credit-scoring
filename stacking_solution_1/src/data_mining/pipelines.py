@@ -82,10 +82,6 @@ def sklearn_pipeline(so_config, ClassifierClass, clf_name, suffix=''):
 
     return sk_clf_pipe 
 
-from .models import LightGBM, CatBoost
-from lightgbm import LGBMClassifier
-from copy import deepcopy
-
 def stacking_solution_1(so_config, suffix=''):
     """
     There are 2 layers:
@@ -131,7 +127,6 @@ PIPELINES = {
     'XGBoost': xgboost_pipeline,
     'NeuralNetwork':neural_network_pipeline,
     'RandomForest': partial(sklearn_pipeline, ClassifierClass=RandomForestClassifier, clf_name='random_forest'),
-    'SVC': partial(sklearn_pipeline, ClassifierClass=SVC, clf_name='svc'),
     'LogisticRegression': partial(sklearn_pipeline, ClassifierClass=LogisticRegression, clf_name='log_reg'),
     'NaiveBayes': partial(sklearn_pipeline, ClassifierClass=BernoulliNB, clf_name='naive_bayes'),
     'StackingSolution1': stacking_solution_1

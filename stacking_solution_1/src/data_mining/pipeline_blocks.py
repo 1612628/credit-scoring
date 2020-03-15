@@ -1,8 +1,6 @@
 # pipeline_blocks
 
 import numpy as np
-from steppy.adapter import Adapter, E
-from steppy.base import Step, make_transformer
 from attrdict import AttrDict
 
 from sklearn.preprocessing import MinMaxScaler

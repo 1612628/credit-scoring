@@ -9,6 +9,8 @@ import pandas as pd
 from scipy.stats import gmean
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.externals import joblib
+
 import gc
 gc.enable()
 
@@ -20,9 +22,6 @@ from ..common.custom_plot import CSPlot
 set_seed(config.RANDOM_SEED)
 logger = init_logger()
 params = read_params(fallback_file='./credit-scoring/stacking_solution_1/configs/config.yaml')
-
-
-
 
 class PipelineManager:
     def train(self, pipeline_name, data_dev_mode, tag):
@@ -125,10 +124,9 @@ def hyperparameter_tunning(pipeline_name, data_dev_mode, tag):
 
     logger.info('Done GridSearchCV')
     logger.info(f'Best params: {grid.best_params_}')
-
-
-
-
+    
+    filepath = config.SOLUTION_CONFIG.tunning.params_dir + '/' +pipeline_name+'.params'
+    joblib.dump(grid.best_params_, filepath)
 
     logger.info('DONE HYPERPARAMETER TUNNING...')
 
