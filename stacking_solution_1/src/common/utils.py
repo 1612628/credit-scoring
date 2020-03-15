@@ -94,3 +94,10 @@ def set_seed(seed=31):
 def flatten_list(l):
   return [item for sublist in l for item in sublist]
 
+def add_prefix_keys(dict_, prefix_key):
+  new_dict = {}
+  for key, val in dict_.items():
+    new_key = prefix_key + key
+    new_dict[new_key] = val
+  
+  return AttrDict(new_dict)

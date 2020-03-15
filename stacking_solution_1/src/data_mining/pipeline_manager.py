@@ -16,7 +16,7 @@ gc.enable()
 
 from . import pipeline_config as config
 from .pipelines import PIPELINES 
-from ..common.utils import init_logger, read_params, set_seed, param_eval, create_submission 
+from ..common.utils import init_logger, read_params, set_seed, param_eval, create_submission, add_prefix_keys
 from ..common.custom_plot import CSPlot
 
 set_seed(config.RANDOM_SEED)
@@ -110,8 +110,9 @@ def hyperparameter_tunning(pipeline_name, data_dev_mode, tag):
     pipeline = PIPELINES[pipeline_name](so_config = config.SOLUTION_CONFIG, suffix=tag)
 
     logger.info('Create GridSearchCV...')
+    param_grid = add_prefix_keys(config.SOLUTION_CONFIG.tuner[pipeline_name], f'{pipeline_name}{tag}')
     grid = GridSearchCV(estimator=pipeline, 
-                        param_grid=config.SOLUTION_CONFIG.tuner[pipeline_name],
+                        param_grid=param_grid,
                         verbose=1,
                         cv=5,
                         n_jobs=-1)

@@ -13,7 +13,7 @@ logger = get_logger()
 
 
 def scale_block(suffix):
-  name = f'scale{suffix}'
+  name = f'Scale{suffix}'
 
   scale = MinMaxScaler()
 
@@ -23,14 +23,14 @@ def scale_block(suffix):
 def lightgbm_block(so_config, suffix, **kwargs):
 
   logger.info('lightgbm block called!')
-  model_name = f'light_gbm{suffix}'
+  model_name = f'LightGBM{suffix}'
 
   light_gbm = LightGBM(so_config.light_gbm)
   return AttrDict({'name':model_name, 'transformer':light_gbm})
 
 def catboost_block(so_config, suffix, **kwargs):
   
-  model_name = f'catboost{suffix}'
+  model_name = f'CatBoost{suffix}'
   
   catboost = CatBoost(so_config.catboost)
  
@@ -38,7 +38,7 @@ def catboost_block(so_config, suffix, **kwargs):
 
 def xgboost_block(so_config, suffix, **kawrgs):
   
-  model_name = f'xgboost{suffix}'
+  model_name = f'XGBoost{suffix}'
   
   xgboost = XGBoost(so_config.xgboost)
 
@@ -46,7 +46,7 @@ def xgboost_block(so_config, suffix, **kawrgs):
 
 def neural_network_block(so_config, suffix, **kwargs):
   
-  model_name = f'neural_network{suffix}'
+  model_name = f'NeuralNetwork{suffix}'
   nn = NeuralNetwork(**so_config.neural_network)  
   return AttrDict({'name':model_name, 'transformer':nn})
 
