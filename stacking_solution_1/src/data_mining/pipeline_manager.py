@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import gmean
 from sklearn.metrics import roc_auc_score
-from sklearn.model_selection import train_test_split, KFold, StratifiedKFold
+from sklearn.model_selection import train_test_split, GridSearchCV
 import gc
 gc.enable()
 
@@ -33,6 +33,9 @@ class PipelineManager:
     
     def predict(self, pipeline_name, tag, is_submit):
         predict_and_submit(pipeline_name, tag, self.clf, is_submit)
+
+    def tunning(self, pipeline_name, tag):
+        hyperparameter_tunning(pipeline_name, False, tag)
     
 def train(pipeline_name, data_dev_mode, tag):
     logger.info('TRAINING...')
@@ -100,6 +103,34 @@ def predict_and_submit(pipeline_name, suffix, classifier, is_submit=False):
         logger.info('Creating submission completed!')
         logger.info(f'submission.csv is pesisted to {submission_filepath}')
     logger.info('DONE PREDICT') 
+
+def hyperparameter_tunning(pipeline_name, data_dev_mode, tag):
+    logger.info('HYPERPARAMETER TUNNING...')
+
+    logger.info('Start pipeline')       
+    pipeline = PIPELINES[pipeline_name](so_config = config.SOLUTION_CONFIG, suffix=tag)
+
+    logger.info('Create GridSearchCV...')
+    grid = GridSearchCV(estimator=pipeline, 
+                        param_grid=config.SOLUTION_CONFIG.tuner[pipeline_name],
+                        verbose=1,
+                        cv=5,
+                        n_jobs=-1)
+    
+    data = _read_data(data_dev_mode)
+
+    train_set = data['train']
+    logger.info('Start GridSearchCV...')
+    grid.fit(train_set.drop(columns=config.TARGET_COL), train_set[config.TARGET_COL])
+
+    logger.info('Done GridSearchCV')
+    logger.info(f'Best params: {grid.best_params_}')
+
+
+
+
+
+    logger.info('DONE HYPERPARAMETER TUNNING...')
 
 def _read_data(data_dev_mode):
     logger.info('Reading data...')

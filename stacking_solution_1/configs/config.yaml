@@ -36,19 +36,38 @@ parameters:
   lgbm__number_boosting_rounds: 100
   lgbm__early_stopping_rounds: 20
   lgbm__learning_rate: 0.1
-  lgbm__max_bin: 500
+  lgbm__max_bin: 512
   lgbm__max_depth: 12
   lgbm__num_leaves: 30
-  lgbm__min_child_samples: 50
-  lgbm__subsample: 1.0
-  lgbm__subsample_freq: 1
-  lgbm__colsample_bytree: 1.0
+  lgbm__min_data_in_leaf: 50
+  lgbm__bagging_fraction: 1.0
+  lgbm__bagging_freq: 1
+  lgbm__feature_fraction: 1.0
   lgbm__min_gain_to_split: 0.0
   lgbm__lambda_l1: 0.0
   lgbm__lambda_l2: 0.0
   lgbm__is_unbalanced: True
   lgbm__scale_pos_weight: 1.
-  
+
+# Light GBM hyperparameters tuning
+  tunning_lgbm__boosting_type: [gbdt, rf, goss]
+  tunning_lgbm__objective: [binary]
+  tunning_lgbm__metric: [auc]
+  tunning_lgbm__number_boosting_rounds: [20, 50, 100, 200]
+  tunning_lgbm__early_stopping_rounds: [20, 50]
+  tunning_lgbm__learning_rate: [0.05, 0.1, 0.15, 0.2]
+  tunning_lgbm__max_bin: [127, 255, 511, 1023]
+  tunning_lgbm__max_depth: [8, 10, 12, 15, 20]
+  tunning_lgbm__num_leaves: [10, 15, 20, 30]
+  tunning_lgbm__min_data_in_leaf: [10, 20, 50, 100]
+  tunning_lgbm__bagging_fraction: [1.0, 0.8, 0.7]
+  tunning_lgbm__bagging_freq: [1, 10, 20]
+  tunning_lgbm__feature_fraction: [1.0, 0.8, 0.7]
+  tunning_lgbm__min_gain_to_split: [0.0]
+  tunning_lgbm__lambda_l1: [0.0, 1.0, 3.0]
+  tunning_lgbm__lambda_l2: [0.0, 1.0, 2.0]
+  tunning_lgbm__is_unbalanced: [True]
+  tunning_lgbm__scale_pos_weight: [1., 2., 4.]
 # Catboost
   catboost__loss_function: Logloss
   catboost__eval_metric: AUC

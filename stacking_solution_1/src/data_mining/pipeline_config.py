@@ -47,10 +47,10 @@ SOLUTION_CONFIG = AttrDict({
         'max_bin': param_eval(params.lgbm__max_bin),
         'max_depth': param_eval(params.lgbm__max_depth),
         'num_leaves': param_eval(params.lgbm__num_leaves),
-        'min_child_samples': param_eval(params.lgbm__min_child_samples),
-        'subsample': param_eval(params.lgbm__subsample),
-        'subsample_freq': param_eval(params.lgbm__subsample_freq),
-        'colsample_bytree': param_eval(params.lgbm__colsample_bytree),
+        'min_data_in_leaf': param_eval(params.lgbm__min_data_in_leaf),
+        'bagging_fraction': param_eval(params.lgbm__bagging_fraction),
+        'bagging_freq': param_eval(params.lgbm__bagging_freq),
+        'feature_fraction': param_eval(params.lgbm__feature_fraction),
         'min_gain_to_split': param_eval(params.lgbm__min_gain_to_split),
         'lambda_l1': param_eval(params.lgbm__lambda_l1),
         'lambda_l2': param_eval(params.lgbm__lambda_l2),
@@ -168,13 +168,26 @@ SOLUTION_CONFIG = AttrDict({
     },
 
     'tuner': {
-        'light_gbm': {
-            'max_depth': ([3, 8], "choice"),
-            'num_leaves': ([20, 100], "choice"),
-            'min_child_samples': ([40, 200], "choice"),
-            'reg_lambda': ([1e-8, 100.], "log-uniform"),
-            'reg_alpha': ([1e-8, 10.], "log-uniform"),
-            'min_gain_to_split': ([0., 1], "uniform")
-        },
+        'LightGBM':{
+                'boosting_type': param_eval(params.tunning_lgbm__boosting_type),
+                'objective': param_eval(params.tunning_lgbm__objective),
+                'metric': param_eval(params.tunning_lgbm__metric),
+                'number_boosting_rounds': param_eval(params.tunning_lgbm__number_boosting_rounds),
+                'early_stopping_rounds': param_eval(params.tunning_lgbm__early_stopping_rounds),
+                'learning_rate': param_eval(params.tunning_lgbm__learning_rate),
+                'max_bin': param_eval(params.tunning_lgbm__max_bin),
+                'max_depth': param_eval(params.tunning_lgbm__max_depth),
+                'num_leaves': param_eval(params.tunning_lgbm__num_leaves),
+                'min_data_in_leaf': param_eval(params.tunning_lgbm__min_data_in_leaf),
+                'bagging_fraction': param_eval(params.tunning_lgbm__bagging_fraction),
+                'bagging_freq': param_eval(params.tunning_lgbm__bagging_freq),
+                'feature_fraction': param_eval(params.tunning_lgbm__feature_fraction),
+                'min_gain_to_split': param_eval(params.tunning_lgbm__min_gain_to_split),
+                'lambda_l1': param_eval(params.tunning_lgbm__lambda_l1),
+                'lambda_l2': param_eval(params.tunning_lgbm__lambda_l2),
+                'is_unbalanced': param_eval(params.tunning_lgbm__is_unbalanced),
+                'scale_pos_weight': param_eval(params.tunning_lgbm__scale_pos_weight),
+            },
+        
     }
 })
