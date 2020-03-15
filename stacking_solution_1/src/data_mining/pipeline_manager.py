@@ -125,7 +125,7 @@ def hyperparameter_tunning(pipeline_name, data_dev_mode, tag):
     logger.info('Done GridSearchCV')
     logger.info(f'Best params: {grid.best_params_}')
     
-    filepath = config.SOLUTION_CONFIG.tunning.params_dir + '/' +pipeline_name+'.params'
+    filepath = config.SOLUTION_CONFIG.tunning.params_dir + '/' +pipeline_name+'.joblib'
     joblib.dump(grid.best_params_, filepath)
 
     logger.info('DONE HYPERPARAMETER TUNNING...')
