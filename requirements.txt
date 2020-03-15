@@ -1,5 +1,5 @@
 # Install essential library
-pandas=='0.25.1'
+pandas
 attrdict 
 click 
 lightgbm 
