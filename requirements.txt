@@ -9,4 +9,5 @@ pyyaml
 xgboost 
 catboost 
 scikit-optimize 
-keras 
+keras
+joblib

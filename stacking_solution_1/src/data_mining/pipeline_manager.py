@@ -9,7 +9,7 @@ import pandas as pd
 from scipy.stats import gmean
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.externals import joblib
+import joblib
 
 import gc
 gc.enable()

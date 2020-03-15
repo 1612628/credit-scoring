@@ -6,7 +6,6 @@ import pandas as pd
 import lightgbm as lgb
 import xgboost as xgb
 import catboost as ctb
-from sklearn.externals import joblib
 
 from sklearn.base import BaseEstimator, ClassifierMixin
 
