@@ -3,7 +3,6 @@ from joblib import Memory
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.naive_bayes import BernoulliNB
 from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.ensemble import StackingClassifier
@@ -85,7 +84,7 @@ def sklearn_pipeline(so_config, ClassifierClass, clf_name, suffix=''):
 def stacking_solution_1(so_config, suffix=''):
     """
     There are 2 layers:
-      Layer_1: lightgbm, catboost, xgboost, nn, svc, random_forest, logistic, naive_bayes
+      Layer_1: lightgbm, catboost, xgboost, nn, svc, random_forest, logistic 
       Layer_2: LogisticRegression
     """
     scale = blocks.scale_block(suffix)
@@ -126,6 +125,5 @@ PIPELINES = {
     'NeuralNetwork':neural_network_pipeline,
     'RandomForest': partial(sklearn_pipeline, ClassifierClass=RandomForestClassifier, clf_name='random_forest'),
     'LogisticRegression': partial(sklearn_pipeline, ClassifierClass=LogisticRegression, clf_name='log_reg'),
-    'NaiveBayes': partial(sklearn_pipeline, ClassifierClass=BernoulliNB, clf_name='naive_bayes'),
     'StackingSolution1': stacking_solution_1
 }
