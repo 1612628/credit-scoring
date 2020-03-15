@@ -95,7 +95,6 @@ def stacking_solution_1(so_config, suffix=''):
     nn = blocks.neural_network_block(so_config, suffix)
     rd_fr = blocks.sklearn_clf_block(RandomForestClassifier,'random_forest', so_config, suffix)
     logit = blocks.sklearn_clf_block(LogisticRegression, 'log_reg', so_config, suffix)
-    nb = blocks.sklearn_clf_block(BernoulliNB, 'naive_bayes', so_config, suffix)
     
     logger.info('Stacking, create layers...')
     clf_layer_1=[
@@ -104,7 +103,6 @@ def stacking_solution_1(so_config, suffix=''):
         (xgb.name, xgb.transformer),
         (nn.name, nn.transformer),
         (rd_fr.name, rd_fr.transformer),
-        (nb.name, nb.transformer)
     ]
 
     logger.info('Stacking, create stacking classifier')
