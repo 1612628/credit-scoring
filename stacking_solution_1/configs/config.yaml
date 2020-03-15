@@ -112,7 +112,7 @@ parameters:
 # XGBoost hyperparameter tunning
   tuning_xgb__booster: [gbtree, dart]
   tuning_xgb__tree_method: [exact, hist] # gpu_hist  # auto  hist
-  tuning_xgb__objective: [binary:logistic]
+  tuning_xgb__objective: ['binary:logistic']
   tuning_xgb__eval_metric: [auc]
   tuning_xgb__num_boost_round: [100, 200, 300, 500]
   tuning_xgb__early_stopping_rounds: [30, 50, 100]
