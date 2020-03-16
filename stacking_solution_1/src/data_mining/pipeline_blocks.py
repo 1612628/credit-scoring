@@ -25,14 +25,14 @@ def lightgbm_block(so_config, suffix, **kwargs):
   logger.info('lightgbm block called!')
   model_name = f'LightGBM{suffix}'
 
-  light_gbm = LightGBM(so_config.light_gbm)
+  light_gbm = LightGBM(**so_config.light_gbm)
   return AttrDict({'name':model_name, 'transformer':light_gbm})
 
 def catboost_block(so_config, suffix, **kwargs):
   
   model_name = f'CatBoost{suffix}'
   
-  catboost = CatBoost(so_config.catboost)
+  catboost = CatBoost(**so_config.catboost)
  
   return AttrDict({'name':model_name, 'transformer':catboost})
 
@@ -40,7 +40,7 @@ def xgboost_block(so_config, suffix, **kawrgs):
   
   model_name = f'XGBoost{suffix}'
   
-  xgboost = XGBoost(so_config.xgboost)
+  xgboost = XGBoost(**so_config.xgboost)
 
   return AttrDict({'name':model_name, 'transformer':xgboost})
 
@@ -54,5 +54,5 @@ def sklearn_clf_block(ClassifierClass, clf_name, so_config, suffix, **kawrgs):
   logger.info('sklearn classifier called!')
   model_name = f'{clf_name}{suffix}'
   model_params = getattr(so_config, clf_name)
-  sklearn_clf = SklearnClassifier(ClassifierClass, model_params) 
+  sklearn_clf = SklearnClassifier(ClassifierClass, **model_params)
   return AttrDict({'name':model_name, 'transformer':sklearn_clf})

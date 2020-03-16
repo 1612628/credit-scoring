@@ -22,7 +22,7 @@ logger = get_logger()
 
 
 class SklearnClassifier(BaseEstimator, ClassifierMixin):
-  def __init__(self, classifier, fit_params):
+  def __init__(self, classifier, **fit_params):
     logger.info('Inital Sklearn classifier...')
     self.params_ = fit_params
     self.classifier_ = classifier
@@ -43,12 +43,13 @@ class SklearnClassifier(BaseEstimator, ClassifierMixin):
     return self.transform(X, args, kwargs)
   
   def get_params(self, deep=True):
-    return {'classifier':self.classifier_, 'fit_params': self.params_}
-  
+    total_params = {'classifier': self.classifier_}
+    total_params.update(self.params_)
+    return total_params  
 
 class LightGBM(BaseEstimator, ClassifierMixin):
 
-  def __init__(self, params):
+  def __init__(self, **params):
     super().__init__()
     logger.info('initializing LightGBM ...')
     self.params_ = params
@@ -57,7 +58,7 @@ class LightGBM(BaseEstimator, ClassifierMixin):
     self.classes_ = np.array([0,1])
   
   def get_params(self, deep=True):
-    return {'params':self.params_}
+    return self.params_
   
   @property
   def model_config(self):
@@ -135,7 +136,7 @@ class LightGBM(BaseEstimator, ClassifierMixin):
 
 class XGBoost(BaseEstimator, ClassifierMixin):
 
-  def __init__(self, params):
+  def __init__(self, **params):
     logger.info('initializing XGBoost ...')
     self.params_ = params
     self.training_params_ = ['num_boost_round', 'early_stopping_rounds']
@@ -143,7 +144,7 @@ class XGBoost(BaseEstimator, ClassifierMixin):
     self.classes_ = np.array([0,1])
   
   def get_params(self, deep=True):
-    return {'params': self.params_}
+    return self.params_
   
   @property
   def model_config(self):
@@ -195,14 +196,14 @@ class XGBoost(BaseEstimator, ClassifierMixin):
 
 class CatBoost(BaseEstimator, ClassifierMixin):
 
-  def __init__(self, params):
+  def __init__(self, **params):
     logger.info('Initializing Catboost...')
     self.params_ = params
     self.estimator_ = ctb.CatBoostClassifier(**params)
     self.classes_ = np.array([0,1])
   
   def get_params(self, deep=True):
-    return {'params': self.params_}
+    return self.params_
   
   def fit(self, X, y, *args, **kwargs):
     logger.info(f'CatBoost, fit') 
