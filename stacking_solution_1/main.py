@@ -1,6 +1,9 @@
 import click
 
-from src.data_mining.pipeline_manager import PipelineManager
+if __package__ is None or __package__ =='':
+    from pipeline_manager import PipelineManager
+else:
+    from src.data_mining.pipeline_manager import PipelineManager
 
 pipeline_manager = PipelineManager()
 

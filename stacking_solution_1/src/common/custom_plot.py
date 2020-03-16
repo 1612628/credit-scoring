@@ -1,7 +1,10 @@
 import matplotlib.pyplot as plt
-from sklearn.metrics import roc_auc_score, roc_curve 
-from .custom_metrics import CSMetrics
+from sklearn.metrics import roc_auc_score, roc_curve
 
+if __package__ is None or __package__ =='':
+    from custom_metrics import CSMetrics
+else:
+    from .custom_metrics import CSMetrics
 class CSPlot:
 
     # plot auc all

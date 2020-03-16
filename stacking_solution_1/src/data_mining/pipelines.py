@@ -7,8 +7,13 @@ from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.ensemble import StackingClassifier
 
-from . import pipeline_blocks as blocks
-from ..common.utils import get_logger
+
+if __package__ is None or __package__ =='':
+    from . import pipeline_blocks as blocks
+    from utils import get_logger
+else:
+    from . import pipeline_blocks as blocks
+    from ..common.utils import get_logger
 
 logger = get_logger()
 

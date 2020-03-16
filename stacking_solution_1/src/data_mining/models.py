@@ -15,7 +15,11 @@ from keras.layers import Dense, Activation, BatchNormalization, Dropout
 from keras.regularizers import l1_l2
 from keras.optimizers import Adam, SGD
 
-from ..common.utils import get_logger
+
+if __package__ is None or __package__ =='':
+  from utils import get_logger
+else:
+  from ..common.utils import get_logger
 
 
 logger = get_logger()

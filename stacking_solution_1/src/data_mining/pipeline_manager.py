@@ -14,11 +14,18 @@ import joblib
 import gc
 gc.enable()
 
-from . import pipeline_config as config
-from .pipelines import PIPELINES 
-from ..common.utils import init_logger, read_params, set_seed, param_eval, create_submission, add_prefix_keys
-from ..common.custom_plot import CSPlot
 
+if __package__ is None or __package__ =='':
+    from . import pipeline_config as config
+    from pipelines import PIPELINES 
+    from utils import init_logger, read_params, set_seed, param_eval, create_submission, add_prefix_keys
+    from common.custom_plot import CSPlot
+else:
+    from . import pipeline_config as config
+    from .pipelines import PIPELINES 
+    from ..common.utils import init_logger, read_params, set_seed, param_eval, create_submission, add_prefix_keys
+    from ..common.custom_plot import CSPlot
+    
 set_seed(config.RANDOM_SEED)
 logger = init_logger()
 params = read_params(fallback_file='./credit-scoring/stacking_solution_1/configs/config.yaml')

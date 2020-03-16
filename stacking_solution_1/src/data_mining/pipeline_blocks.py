@@ -5,9 +5,14 @@ from attrdict import AttrDict
 
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.linear_model import LogisticRegression
-from .models import XGBoost, LightGBM, NeuralNetwork, CatBoost, SklearnClassifier
-from ..common.utils import get_logger
 from sklearn.ensemble import StackingClassifier
+
+if __package__ is None or __package__ =='':
+  from models import XGBoost, LightGBM, NeuralNetwork, CatBoost, SklearnClassifier
+  from utils import get_logger
+else:
+  from .models import XGBoost, LightGBM, NeuralNetwork, CatBoost, SklearnClassifier
+  from ..common.utils import get_logger
 
 logger = get_logger()
 
