@@ -1,0 +1,20 @@
+{
+    "Catboost_sol_0.0__loss_function": ("Logloss",),
+    "Catboost_sol_0.0__eval_metric": ("AUC",),
+    "Catboost_sol_0.0__iterations": (15,
+    20,
+    30,
+    50,
+    80,
+    110),
+    "Catboost_sol_0.0__learning_rate": (0.1,),
+    "Catboost_sol_0.0__depth": (6,),
+    "Catboost_sol_0.0__l2_leaf_reg": (1,),
+    "Catboost_sol_0.0__colsample_bylevel": (1.0,),
+    "Catboost_sol_0.0__max_bin": (127,),
+    "Catboost_sol_0.0__od_type": ("Iter", "IncToDec"),
+    "Catboost_sol_0.0__od_wait": (30,),
+    "Catboost_sol_0.0__thread_count": [
+        8
+    ]
+}

@@ -121,7 +121,7 @@ def stacking_solution_1(so_config, suffix=''):
 
 PIPELINES = {
     'LightGBM':lightgbm_pipeline,
-    'Catboost':catboost_pipeline,
+    'CatBoost':catboost_pipeline,
     'XGBoost': xgboost_pipeline,
     'NeuralNetwork':neural_network_pipeline,
     'RandomForest': partial(sklearn_pipeline, ClassifierClass=RandomForestClassifier, clf_name='random_forest'),

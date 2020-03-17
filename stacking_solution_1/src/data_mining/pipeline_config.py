@@ -29,16 +29,6 @@ SOLUTION_CONFIG = AttrDict({
     'pipeline':{
         'experiment_dir': params.experiment_dir
     },
-    'hyperparameter_search':{
-        'method': param_eval(params.hyperparameter_search__method),
-        'runs': param_eval(params.hyperparameter_search__runs)
-    },
-    'train':{
-        'table_name':'train',
-        'id_col':'id',
-        'categorical_cols': CATEGORICAL_COLS,
-        'numerical_cols': NUMERICAL_COLS,
-    },
     'light_gbm':{
         'device': param_eval(params.lgbm__device),
         'boosting_type': param_eval(params.lgbm__boosting_type),
@@ -172,7 +162,7 @@ SOLUTION_CONFIG = AttrDict({
                 'is_unbalanced': param_eval(params.tuning_lgbm__is_unbalanced),
                 'scale_pos_weight': param_eval(params.tuning_lgbm__scale_pos_weight),
             },
-        'Catboost': {
+        'CatBoost': {
                 'loss_function': param_eval(params.tuning_catboost__loss_function),
                 'eval_metric': param_eval(params.tuning_catboost__eval_metric),
                 'iterations': param_eval(params.tuning_catboost__iterations),

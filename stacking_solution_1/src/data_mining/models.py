@@ -216,7 +216,7 @@ class CatBoost(BaseEstimator, ClassifierMixin):
     logger.info('Initializing Catboost...')
     self.params_ = params
     self.classes_ = np.array([0,1])
-  
+
   def get_params(self, deep=True):
     return self.params_
   
