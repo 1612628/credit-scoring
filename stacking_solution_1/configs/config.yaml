@@ -65,7 +65,7 @@ parameters:
   tuning_lgbm__feature_fraction: [0.8, 0.75]
   tuning_lgbm__min_gain_to_split: [0.0]
   tuning_lgbm__lambda_l1: [3.0]
-  tuning_lgbm__lambda_l2: [5.0. 8.0]
+  tuning_lgbm__lambda_l2: [5.0, 8.0]
   tuning_lgbm__is_unbalanced: [True]
   tuning_lgbm__scale_pos_weight: [60.7]
 
