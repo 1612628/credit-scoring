@@ -50,7 +50,7 @@ parameters:
   lgbm__is_unbalanced: True
   lgbm__scale_pos_weight: 60.7
 # Light GBM hyperparameters tuning
-  tuning_lgbm__boosting_type: [gdtree, goss]
+  tuning_lgbm__boosting_type: [goss]
   tuning_lgbm__objective: [binary]
   tuning_lgbm__metric: [auc]
   tuning_lgbm__number_boosting_rounds: [20, 30]
