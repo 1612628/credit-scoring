@@ -172,7 +172,7 @@ SOLUTION_CONFIG = AttrDict({
                 'is_unbalanced': param_eval(params.tuning_lgbm__is_unbalanced),
                 'scale_pos_weight': param_eval(params.tuning_lgbm__scale_pos_weight),
             },
-        'CatBoost': {
+        'Catboost': {
                 'loss_function': param_eval(params.tuning_catboost__loss_function),
                 'eval_metric': param_eval(params.tuning_catboost__eval_metric),
                 'iterations': param_eval(params.tuning_catboost__iterations),
