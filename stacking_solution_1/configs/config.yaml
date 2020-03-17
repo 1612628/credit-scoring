@@ -93,6 +93,7 @@ parameters:
   tuning_catboost__od_wait: [30]
 
   # tuning_catboost__od_type: ['Iter', 'IncToDec']
+
 # XGBoost
   xgb__booster: gbtree
   xgb__tree_method: exact # gpu_hist  # auto  hist

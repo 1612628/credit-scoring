@@ -215,7 +215,6 @@ class CatBoost(BaseEstimator, ClassifierMixin):
   def __init__(self, **params):
     logger.info('Initializing Catboost...')
     self.params_ = params
-    self.estimator_ = ctb.CatBoostClassifier(**params)
     self.classes_ = np.array([0,1])
   
   def get_params(self, deep=True):
@@ -226,6 +225,7 @@ class CatBoost(BaseEstimator, ClassifierMixin):
     logger.info(f'CatBoost, training data shape {X.shape}')
     logger.info(f'CatBoost, training label shape {y.shape}')
 
+    self.estimator_ = ctb.CatBoostClassifier(**self.params_)
     self.estimator_.fit(X,
                        y,
                        eval_set=[(X, y)])
