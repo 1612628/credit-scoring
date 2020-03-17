@@ -34,7 +34,7 @@ class PipelineManager:
         predict_and_submit(pipeline_name, tag, self.clf, self.test_set, is_submit)
 
     def tuning(self, pipeline_name, tag):
-        hyperparameter_tunning(pipeline_name, True, tag)
+        hyperparameter_tunning(pipeline_name, False, tag)
 
 def read_data(data_dev_mode, tag):
     data = _read_data(data_dev_mode)
