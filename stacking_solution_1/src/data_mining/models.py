@@ -18,6 +18,7 @@ from keras.optimizers import Adam, SGD
 from lightgbm import LGBMClassifier
 from sklearn.feature_selection import RFECV
 from sklearn.model_selection import StratifiedKFold
+from sklearn.metrics import roc_auc_score
 
 
 from ..common.utils import get_logger
@@ -52,6 +53,9 @@ class SklearnClassifier(BaseEstimator, ClassifierMixin):
     total_params = {'classifier': self.classifier_}
     total_params.update(self.params_)
     return total_params  
+  def score(self, X, y, *args, **kwargs):
+    return roc_auc_score(y, self.transform(X)) 
+
 
 class LightGBM(BaseEstimator, ClassifierMixin):
 
@@ -113,6 +117,9 @@ class LightGBM(BaseEstimator, ClassifierMixin):
     logger.info('LightGBM, done transform.')
     return pred
   
+  def score(self, X, y, *args, **kwargs):
+    return roc_auc_score(y, self.transform(X)) 
+
   def predict_proba(self, X, *args, **kwargs):
     return self.transform(X, args, kwargs)
 
@@ -196,6 +203,9 @@ class XGBoost(BaseEstimator, ClassifierMixin):
     logger.info('XGBoost, done transform.')
     return pred
   
+  def score(self, X, y, *args, **kwargs):
+    return roc_auc_score(y, self.transform(X)) 
+
   def predict_proba(self, X, *args, **kwargs):
     return self.transform(X, args, kwargs)
 
@@ -230,6 +240,9 @@ class CatBoost(BaseEstimator, ClassifierMixin):
     logger.info(f'CatBoost, done transform') 
     return pred
   
+  def score(self, X, y, *args, **kwargs):
+    return roc_auc_score(y, self.transform(X)) 
+
   def predict_proba(self, X, *args, **kwargs):
     return self.transform(X, args, kwargs)
 
@@ -300,6 +313,9 @@ class NeuralNetwork(BaseEstimator, ClassifierMixin):
     logger.info(f'Neural network, done fit') 
     return self
   
+  def score(self, X, y, *args, **kwargs):
+    return roc_auc_score(y, self.transform(X)) 
+
   def transform(self, X, *args, **kwargs):
     logger.info(f'Neural network, transform') 
     logger.info(f'Neural network, transform, testing shape: {X.shape}')
