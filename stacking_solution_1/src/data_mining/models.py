@@ -15,12 +15,14 @@ from keras.layers import Dense, Activation, BatchNormalization, Dropout
 from keras.regularizers import l1_l2
 from keras.optimizers import Adam, SGD
 
+from lightgbm import LGBMClassifier
+from sklearn.feature_selection import RFECV
+from sklearn.model_selection import StratifiedKFold
 
-if __package__ is None or __package__ =='':
-  from utils import get_logger
-else:
-  from ..common.utils import get_logger
 
+from ..common.utils import get_logger
+import gc
+gc.enable()
 
 logger = get_logger()
 
@@ -310,3 +312,73 @@ class NeuralNetwork(BaseEstimator, ClassifierMixin):
   def predict_proba(self, X, *args, **kwargs):
     return self.transform(X, args, kwargs)
 
+class FeatureSelection(BaseEstimator, ClassifierMixin):
+
+  def __init__(self):
+    logger.info('Initial FeatureSelection...')
+  
+  def fit(self, X, y, X_test, *arg, **kwargs):
+    logger.info('FeatureSelection, fit')
+    logger.info(f'FeatureSelection, fit, data train shape: {X.shape}')
+    logger.info(f'FeatureSelection, fit, data test shape: {X_test.shape}')
+    logger.info(f'FeatureSelection, fit, label shape: {y.shape}')
+
+    logger.info('FeatureSelection, RFECV')
+    estimator_ = LGBMClassifier(learning_rate=0.1,num_leaves=15,n_estimators=10,ranstdom_state=42)
+    self.rfecv_ = RFECV(estimator=estimator_, step=1, cv=5, scoring='roc_auc')
+    self.rfecv_.fit(X, y)
+
+    logger.info('FeatureSelection, CovariateShift')
+    self.covariateshift_ = CovariateShift()
+    self.covariateshift_.fit(X, X_test)
+
+    logger.info('FeatureSelection, done fit')
+    return self
+  
+  def transform(self, X, *args, **kwargs):
+    logger.info('FeatureSelection, transform')
+
+    rfecv_feas = set(self.rfecv_.support_)
+    covashift_feas = set(self.covariateshift_.transform(X))   
+    
+    logger.info('FeatureSelection, done transform')
+    return list(rfecv_feas.union(covashift_feas))
+
+class CovariateShift(BaseEstimator, ClassifierMixin):
+  
+  def __init__(self):
+    logger.info('Initial CovariateShift...')
+
+  def fit(self, X, X_test, *arg, **kwargs):
+    logger.info('CovariateShift, fit')
+    logger.info(f'CovariateShift, data shape: {X.shape}')
+    logger.info(f'CovariateShift, data test shape: {X_test.shape}')
+    X_temp = X.copy()
+    X_temp['is_train'] = 1
+    X_test_temp = X_test.copy()
+    X_test_temp['is_train'] = 0
+    
+    df_combine = pd.concat([X_temp, X_test_temp], axis=0, ignore_index=True)
+    y = df_combine['is_train']
+    df_combine.drop(columns=['is_train'], inplace=True)
+    self.estimator_ = LGBMClassifier(learning_rate=0.1,num_leaves=15,n_estimators=10,ranstdom_state=42)
+    self.estimator_.fit(df_combine, y)
+
+    logger.info('CovariateShift, done fit')
+    del X_temp, X_test_temp, df_combine
+    gc.collect()
+    return self
+
+  def transform(self, X, *arg, **kwargs):
+    logger.info('CovariateShift, transform')
+    logger.info(f'CovariateShift, transform, data shape: {X.shape}')
+    cols_selected = int(len(X.columns)*0.85)
+
+    feature_imp = pd.concat([pd.DataFrame(self.estimator_.feature_importances_),
+              pd.DataFrame(list(X.columns))],
+              axis=1, ignore_index=True)
+    feature_imp.columns = ['Value', 'Feature']
+    feature_imp = feature_imp.sort_values(by='Value', ascending=True)
+
+    logger.info('CovariateShift, done transform')
+    return feature_imp['Feature'][:cols_selected]

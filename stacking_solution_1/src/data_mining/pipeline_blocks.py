@@ -6,15 +6,20 @@ from attrdict import AttrDict
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import StackingClassifier
+from sklearn.decomposition import PCA
+from sklearn.feature_selection import RFECV
 
-if __package__ is None or __package__ =='':
-  from models import XGBoost, LightGBM, NeuralNetwork, CatBoost, SklearnClassifier
-  from utils import get_logger
-else:
-  from .models import XGBoost, LightGBM, NeuralNetwork, CatBoost, SklearnClassifier
-  from ..common.utils import get_logger
+from .models import XGBoost, LightGBM, NeuralNetwork, CatBoost, SklearnClassifier, FeatureSelection
+from ..common.utils import get_logger
 
 logger = get_logger()
+
+def pca_block(suffix):
+  name = f'pca{suffix}'
+
+  pca = PCA()
+
+  return AttrDict({'name':name, 'transformer':pca})
 
 
 def scale_block(suffix):
@@ -24,13 +29,18 @@ def scale_block(suffix):
 
   return AttrDict({'name':name, 'transformer': scale})
 
+def selection_block(so_config, suffix):
+  name = f'FeatureSelection{suffix}'
+
+  selection = FeatureSelection()
+
+  return AttrDict({'name': name, 'transformer': selection})
 
 def lightgbm_block(so_config, suffix, **kwargs):
-
-  logger.info('lightgbm block called!')
   model_name = f'LightGBM{suffix}'
 
   light_gbm = LightGBM(**so_config.light_gbm)
+
   return AttrDict({'name':model_name, 'transformer':light_gbm})
 
 def catboost_block(so_config, suffix, **kwargs):

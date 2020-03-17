@@ -8,18 +8,15 @@ from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.ensemble import StackingClassifier
 
 
-if __package__ is None or __package__ =='':
-    from . import pipeline_blocks as blocks
-    from utils import get_logger
-else:
-    from . import pipeline_blocks as blocks
-    from ..common.utils import get_logger
+from . import pipeline_blocks as blocks
+from ..common.utils import get_logger
 
 logger = get_logger()
 
 
 def lightgbm_pipeline(so_config, suffix=''):
     scale = blocks.scale_block(suffix)
+
     light_gbm =  blocks.lightgbm_block(so_config, suffix)
     memory = Memory(location=so_config.pipeline.experiment_dir, verbose=10)
     lightgbm_pipe = Pipeline([
@@ -105,7 +102,6 @@ def stacking_solution_1(so_config, suffix=''):
         (light.name, light.transformer),
         (cat.name, cat.transformer),
         (xgb.name, xgb.transformer),
-        (nn.name, nn.transformer),
         (rd_fr.name, rd_fr.transformer),
     ]
 

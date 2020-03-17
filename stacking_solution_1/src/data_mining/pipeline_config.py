@@ -2,10 +2,7 @@
 
 from attrdict import AttrDict
 
-if __package__ is None or __package__ =='':
-    from utils import read_params, param_eval
-else:
-    from ..common.utils import read_params, param_eval
+from ..common.utils import read_params, param_eval
 
 params = read_params(fallback_file='./credit-scoring/stacking_solution_1/configs/config.yaml')
 
