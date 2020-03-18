@@ -2,6 +2,8 @@ parameters:
 # Data
   train_filepath: './input/train_input_multi_imputed.csv'
   test_filepath: './input/test_input_multi_imputed.csv'
+  train_preprocessed_filepath: './input/train_preprocessed_filepath.csv'
+  test_preprocessed_filepath: './input/test_preprocessed_filepath.csv'
   first_level_oof_predictions_dir: './models/stacking_1/oof'
   experiment_dir: './models/stacking_1/exp'
   params_dir: './models/params'

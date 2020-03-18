@@ -430,6 +430,8 @@ class SMOte(BaseEstimator, ClassifierMixin):
     logger.info('SMOTE, done transform.')
     return X_new, y_new
 
+  def fit_transform(self, X, y, *args, **kwargs):
+    return self.fit(X, y).transform(X, y)
 
 
 
