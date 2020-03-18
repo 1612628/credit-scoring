@@ -86,13 +86,13 @@ parameters:
   tuning_catboost__loss_function: [Logloss]
   tuning_catboost__eval_metric: [AUC]
   tuning_catboost__iterations: [15]
-  tuning_catboost__learning_rate: [0.3, 0.35]
-  tuning_catboost__depth: [10, 12]
-  tuning_catboost__l2_leaf_reg: [3.0, 5.0]
-  tuning_catboost__max_bin: [127]
-  tuning_catboost__colsample_bylevel: [1.0]
+  tuning_catboost__learning_rate: [0.3]
+  tuning_catboost__depth: [10]
+  tuning_catboost__l2_leaf_reg: [3.0, 3.5]
+  tuning_catboost__max_bin: [127] 
+  tuning_catboost__colsample_bylevel: [1.0, 0.9]
   tuning_catboost__od_type: ['Iter']
-  tuning_catboost__od_wait: [30]
+  tuning_catboost__od_wait: [5, 10]
 
 # XGBoost
   xgb__booster: gbtree
