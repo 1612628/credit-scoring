@@ -158,7 +158,8 @@ def hyperparameter_tunning(pipeline_name, data_dev_mode, tag, train_filepath, te
     logger.info('HYPERPARAMETER TUNNING, Done GridSearchCV')
     logger.info(f'HYPERPARAMETER TUNNING, Best params: {grid.best_params_}')
 
-    json.dumps(grid.best_params_) 
+    with open(pipeline_name+'.json', 'a+') as out_params_file:
+        json.dump(grid.best_params_, out_params_file) 
 
     del train_set, y
     gc.collect()
