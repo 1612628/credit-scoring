@@ -9,7 +9,7 @@ from sklearn.ensemble import StackingClassifier
 from sklearn.decomposition import PCA
 from sklearn.feature_selection import RFECV
 
-from .models import XGBoost, LightGBM, NeuralNetwork, CatBoost, SklearnClassifier, FeatureSelection
+from .models import XGBoost, LightGBM, NeuralNetwork, CatBoost, SklearnClassifier, FeatureSelection, SMOte
 from ..common.utils import get_logger
 
 logger = get_logger()
@@ -20,6 +20,12 @@ def pca_block(suffix):
   pca = PCA()
 
   return AttrDict({'name':name, 'transformer':pca})
+
+def over_sample_block(suffix):
+  name = f'smote{suffix}'
+  smote = SMOte(sampling_strategy=0.25, random_state=900031)
+
+  return AttrDict({'name':name, 'transformer':smote})
 
 
 def scale_block(suffix):

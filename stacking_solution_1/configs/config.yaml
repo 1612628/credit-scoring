@@ -85,7 +85,7 @@ parameters:
   tuning_catboost__eval_metric: [AUC]
   tuning_catboost__iterations: [15]
   tuning_catboost__learning_rate: [0.2, 0.25, 0.3]
-  tuning_catboost__depth: [6, 10, 15, 20]
+  tuning_catboost__depth: [6, 10, 20]
   tuning_catboost__l2_leaf_reg: [1]
   tuning_catboost__max_bin: [127]
   tuning_catboost__colsample_bylevel: [1.0]

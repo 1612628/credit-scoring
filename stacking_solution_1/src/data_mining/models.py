@@ -20,6 +20,7 @@ from sklearn.feature_selection import RFECV
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 
+from imblearn.over_sampling import SMOTE
 
 from ..common.utils import get_logger
 import gc
@@ -398,3 +399,100 @@ class CovariateShift(BaseEstimator, ClassifierMixin):
 
     logger.info('CovariateShift, done transform')
     return feature_imp['Feature'][:cols_selected]
+
+
+class SMOte(BaseEstimator, ClassifierMixin):
+  def __init__(self, **params):
+    logger.info('Initializing SMOTE...')
+    self.params_ = params
+
+  def get_params(self, deep=True):
+    return self.params_
+
+  def fit(self, X, y, *args, **kwargs):
+    logger.info('SMOTE, fit.')
+    logger.info(f'SMOTE, data shape: {X.shape}')
+    logger.info(f'SMOTE, label shape: {y.shape}')
+
+    self.sm_ = SMOTE(**self.params_)
+    logger.info('SMOTE, done fit.')
+    return self
+  
+  def transform(self, X, y, *args, **kwargs):
+    logger.info('SMOTE, transform.')
+    logger.info(f'SMOTE, data shape: {X.shape}')
+    logger.info(f'SMOTE, label shape: {y.shape}')
+
+    X_new, y_new = self.sm_.fit_resample(X, y)
+
+    X_new = pd.DataFrame(X_new, columns=X.columns)
+
+    logger.info('SMOTE, done transform.')
+    return X_new, y_new
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
