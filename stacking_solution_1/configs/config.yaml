@@ -2,8 +2,8 @@ parameters:
 # Data
   train_filepath: './input/train_input_multi_imputed.csv'
   test_filepath: './input/test_input_multi_imputed.csv'
-  train_preprocessed_filepath: './input/train_preprocessed_filepath.csv'
-  test_preprocessed_filepath: './input/test_preprocessed_filepath.csv'
+  train_preprocessed_filepath: './input/train_input_preprocessed.csv'
+  test_preprocessed_filepath: './input/test_input_preprocessed.csv'
   first_level_oof_predictions_dir: './models/stacking_1/oof'
   experiment_dir: './models/stacking_1/exp'
   params_dir: './models/params'
@@ -91,7 +91,7 @@ parameters:
   tuning_catboost__l2_leaf_reg: [1, 3.0]
   tuning_catboost__max_bin: [127]
   tuning_catboost__colsample_bylevel: [1.0]
-  tuning_catboost__od_type: ['Iter', 'IncToDec']
+  tuning_catboost__od_type: ['Iter']
   tuning_catboost__od_wait: [30]
 
 # XGBoost
