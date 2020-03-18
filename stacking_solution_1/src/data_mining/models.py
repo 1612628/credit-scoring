@@ -2,6 +2,7 @@
 from attrdict import AttrDict
 import numpy as np
 import pandas as pd
+from collections import Counter
 
 import lightgbm as lgb
 import xgboost as xgb
@@ -424,9 +425,9 @@ class SMOte(BaseEstimator, ClassifierMixin):
     logger.info(f'SMOTE, label shape: {y.shape}')
 
     X_new, y_new = self.sm_.fit_resample(X, y)
-
     X_new = pd.DataFrame(X_new, columns=X.columns)
 
+    logger.info(f'SMOTE, Resampled dataset shape: {Counter(y_new)}')
     logger.info('SMOTE, done transform.')
     return X_new, y_new
 

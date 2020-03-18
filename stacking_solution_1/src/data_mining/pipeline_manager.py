@@ -26,8 +26,8 @@ set_seed(config.RANDOM_SEED)
 logger = init_logger()
 
 class PipelineManager:
-    def preprocessing(self, tag, train_filepath=config.params.train_filepath, test_filepath=config.params.test_filepath):
-        preprocessing(False, tag, train_filepath, test_filepath)
+    def preprocessing(self, tag, train_filepath=config.params.train_filepath, test_filepath=config.params.test_filepath, train_preprocessed_filepath=config.params.train_preprocessed_filepath, test_preprocessed_filepath=config.params.test_preprocessed_filepath):
+        preprocessing(False, tag, train_filepath, test_filepath, train_preprocessed_filepath, test_preprocessed_filepath)
 
     def train(self, pipeline_name, data_dev_mode, tag, train_filepath=config.params.train_preprocessed_filepath, test_filepath=config.params.test_preprocessed_filepath):
         self.pipe = train(pipeline_name, data_dev_mode, tag, train_filepath, test_filepath)
@@ -38,7 +38,7 @@ class PipelineManager:
     def tuning(self, pipeline_name, tag, train_filepath=config.params.train_preprocessed_filepath, test_filepath=config.params.test_preprocessed_filepath):
         hyperparameter_tunning(pipeline_name, False, tag, train_filepath, test_filepath)
 
-def preprocessing(data_dev_mode, tag, train_filepath, test_filepath):
+def preprocessing(data_dev_mode, tag, train_filepath, test_filepath, train_preprocessed_filepath, test_preprocessed_filepath):
     logger.info('PREPROCESSING...')
     logger.info(f'PREPROCESSING, train filepath: {train_filepath}')
     logger.info(f'PREPROCESSING, test filepath: {test_filepath}')
@@ -56,7 +56,7 @@ def preprocessing(data_dev_mode, tag, train_filepath, test_filepath):
     train_new_features = pd.DataFrame(pca_extract.transformer.fit_transform(train_set))
     test_new_features = pd.DataFrame(pca_extract.transformer.fit_transform(test_set))
     train_set = pd.concat([train_set, train_new_features], axis=1)
-    test_set = pd.concat([test_set, test_new_features])
+    test_set = pd.concat([test_set, test_new_features], axis=1)
 
     logger.info('PREPROCESSING, Oversampling...')
     temp_train_set = train_set
@@ -78,11 +78,11 @@ def preprocessing(data_dev_mode, tag, train_filepath, test_filepath):
     gc.collect()
 
     logger.info('')
-    train_set.to_csv(config.params.train_preprocessed_filepath)
-    test_set.to_csv(config.params.test_preprocessed_filepath)
+    train_set.to_csv(train_preprocessed_filepath)
+    test_set.to_csv(test_preprocessed_filepath)
 
-    logger.info(f'PREPROCESSING, Train set is dumped into path: {config.params.train_preprocessed_filepath}')
-    logger.info(f'PREPROCESSING, Test set is dumped into path: {config.params.test_preprocessed_filepath}')
+    logger.info(f'PREPROCESSING, Train set is dumped into path: {train_preprocessed_filepath}')
+    logger.info(f'PREPROCESSING, Test set is dumped into path: {test_preprocessed_filepath}')
     logger.info('DONE PREPROCESSING...')
     return train_set, test_set
 
