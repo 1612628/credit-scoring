@@ -175,6 +175,25 @@ SOLUTION_CONFIG = AttrDict({
                 'od_wait': param_eval(params.tuning_catboost__od_wait),
                 'thread_count': [params.num_workers],
             },
+        'XGBoost': {
+                'booster': param_eval(params.xgb__booster),
+                'objective': param_eval(params.xgb__objective),
+                'tree_method': param_eval(params.xgb__tree_method),
+                'eval_metric': param_eval(params.xgb__eval_metric),
+                'eta': param_eval(params.xgb__eta),
+                'max_depth': param_eval(params.xgb__max_depth),
+                'subsample': param_eval(params.xgb__subsample),
+                'colsample_bylevel': param_eval(params.xgb__colsample_bylevel),
+                'min_child_weight': param_eval(params.xgb__min_child_weight),
+                'lambda': param_eval(params.xgb__lambda),
+                'alpha': param_eval(params.xgb__alpha),
+                'max_bin': param_eval(params.xgb__max_bin),
+                'num_leaves': param_eval(params.xgb__max_leaves),
+                'num_boost_round': param_eval(params.xgb__num_boost_round),
+                'early_stopping_rounds': param_eval(params.xgb__early_stopping_rounds),
+                'scale_pos_weight': param_eval(params.xgb__scale_pos_weight),
+                'nthread': [param_eval(params.num_workers)],
+            },
         'NeuralNetwork': {
             'architecture_config': {
                 'model_params': {

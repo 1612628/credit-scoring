@@ -74,25 +74,25 @@ parameters:
 # Catboost
   catboost__loss_function: Logloss
   catboost__eval_metric: AUC
-  catboost__iterations: 50
-  catboost__learning_rate: 0.05
-  catboost__depth: 6
-  catboost__l2_leaf_reg: 2
-  catboost__max_bin: 150 
+  catboost__iterations: 15
+  catboost__learning_rate: 0.3
+  catboost__depth: 10
+  catboost__l2_leaf_reg: 3.0
+  catboost__max_bin: 127
   catboost__colsample_bylevel: 1.0
   catboost__od_type: 'Iter'
-  catboost__od_wait: 30 
+  catboost__od_wait: 5 
 # Catboost hyperparameter tunning
   tuning_catboost__loss_function: [Logloss]
   tuning_catboost__eval_metric: [AUC]
   tuning_catboost__iterations: [15]
   tuning_catboost__learning_rate: [0.3]
   tuning_catboost__depth: [10]
-  tuning_catboost__l2_leaf_reg: [3.0, 3.5]
+  tuning_catboost__l2_leaf_reg: [3.0]
   tuning_catboost__max_bin: [127] 
-  tuning_catboost__colsample_bylevel: [1.0, 0.9]
+  tuning_catboost__colsample_bylevel: [1.0]
   tuning_catboost__od_type: ['Iter']
-  tuning_catboost__od_wait: [5, 10]
+  tuning_catboost__od_wait: [5]
 
 # XGBoost
   xgb__booster: gbtree
@@ -112,21 +112,21 @@ parameters:
   xgb__alpha: 10
   xgb__scale_pos_weight: 60.7
 # XGBoost hyperparameter tunning
-  tuning_xgb__booster: [gbtree, dart]
-  tuning_xgb__tree_method: [exact, hist] # gpu_hist  # auto  hist
+  tuning_xgb__booster: [gbtree] #dart
+  tuning_xgb__tree_method: [exact] # hist 
   tuning_xgb__objective: ['binary:logistic']
   tuning_xgb__eval_metric: [auc]
-  tuning_xgb__num_boost_round: [100, 200, 300, 500]
-  tuning_xgb__early_stopping_rounds: [30, 50, 100]
-  tuning_xgb__eta: [0.1, 0.15, 0.2]
-  tuning_xgb__max_leaves: [10, 15, 20, 30]
-  tuning_xgb__max_depth: [6, 10, 13, 18]
-  tuning_xgb__max_bin: [127, 255, 511, 1023]
-  tuning_xgb__subsample: [1.0, 0.8, 0.7]
-  tuning_xgb__colsample_bylevel: [1, 0.8, 0.7]
-  tuning_xgb__min_child_weight: [3, 5, 10]
-  tuning_xgb__lambda: [1, 2, 3]
-  tuning_xgb__alpha: [1, 2, 4] 
+  tuning_xgb__num_boost_round: [100, 200]
+  tuning_xgb__early_stopping_rounds: [30]
+  tuning_xgb__eta: [0.1]
+  tuning_xgb__max_leaves: [10, 15]
+  tuning_xgb__max_depth: [10, 18]
+  tuning_xgb__max_bin: [127]
+  tuning_xgb__subsample: [1.0]
+  tuning_xgb__colsample_bylevel: [1.0]
+  tuning_xgb__min_child_weight: [3]
+  tuning_xgb__lambda: [1]
+  tuning_xgb__alpha: [1] 
   tuning_xgb__scale_pos_weight: [60.7]
 
 # Neural Network
