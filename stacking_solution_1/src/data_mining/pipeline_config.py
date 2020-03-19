@@ -116,7 +116,6 @@ SOLUTION_CONFIG = AttrDict({
         'n_jobs': param_eval(params.num_workers),
     },
 
-
     'neural_network': {
         'architecture_config': {
             'model_params': {
