@@ -124,4 +124,22 @@
     "XGBoost_sol_0.0__scale_pos_weight": 60.7,
     "XGBoost_sol_0.0__subsample": 1.0,
     "XGBoost_sol_0.0__tree_method": "exact"
+}{
+    "XGBoost_sol_0.0__alpha": 1,
+    "XGBoost_sol_0.0__booster": "gbtree",
+    "XGBoost_sol_0.0__colsample_bylevel": 1.0,
+    "XGBoost_sol_0.0__early_stopping_rounds": 30,
+    "XGBoost_sol_0.0__eta": 0.15,
+    "XGBoost_sol_0.0__eval_metric": "auc",
+    "XGBoost_sol_0.0__lambda": 2,
+    "XGBoost_sol_0.0__max_bin": 127,
+    "XGBoost_sol_0.0__max_depth": 10,
+    "XGBoost_sol_0.0__min_child_weight": 3,
+    "XGBoost_sol_0.0__nthread": 8,
+    "XGBoost_sol_0.0__num_boost_round": 300,
+    "XGBoost_sol_0.0__num_leaves": 10,
+    "XGBoost_sol_0.0__objective": "binary:logistic",
+    "XGBoost_sol_0.0__scale_pos_weight": 60.7,
+    "XGBoost_sol_0.0__subsample": 1.0,
+    "XGBoost_sol_0.0__tree_method": "exact"
 }
