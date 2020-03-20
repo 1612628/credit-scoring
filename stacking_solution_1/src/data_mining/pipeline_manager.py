@@ -4,12 +4,16 @@ import os
 import shutil
 import json
 
+from scipy import interp
+import matplotlib.pyplot as plt
+
 from attrdict import AttrDict
 import numpy as np
 import pandas as pd
 from scipy.stats import gmean
-from sklearn.metrics import roc_auc_score
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.metrics import roc_auc_score, auc, plot_roc_curve
+from sklearn.model_selection import train_test_split, GridSearchCV, KFold
+
 import joblib
 
 import gc
@@ -20,7 +24,6 @@ from . import pipeline_config as config
 from . import pipeline_blocks as blocks
 from .pipelines import PIPELINES 
 from ..common.utils import init_logger, read_params, set_seed, param_eval, create_submission, add_prefix_keys
-from ..common.custom_plot import CSPlot
     
 set_seed(config.RANDOM_SEED)
 logger = init_logger()
@@ -31,6 +34,9 @@ class PipelineManager:
 
     def train(self, pipeline_name, data_dev_mode, tag, train_filepath=config.params.train_preprocessed_filepath, test_filepath=config.params.test_preprocessed_filepath):
         self.pipe = train(pipeline_name, data_dev_mode, tag, train_filepath, test_filepath)
+    
+    def train_cv(self, pipeline_name, data_dev_mode, tag):
+        train_cv(pipeline_name, data_dev_mode, tag)
     
     def predict(self, pipeline_name, tag, is_submit, train_filepath=config.params.train_preprocessed_filepath, test_filepath=config.params.test_preprocessed_filepath):
         predict_and_submit(pipeline_name, tag, self.pipe, train_filepath, test_filepath, is_submit=is_submit)
@@ -111,6 +117,26 @@ def train(pipeline_name, data_dev_mode, tag, train_filepath, test_filepath):
     gc.collect()
     return pipeline 
 
+def train_cv(pipeline_name, data_dev_mode, tag):
+    logger.info('TRAINING CV ...')
+    
+    if bool(config.params.clean_experiment_directory_before_training) and os.path.isdir(config.params.experiment_dir):
+        logger.info('Cleaning experiment directory...')
+        shutil.rmtree(config.params.experiment_dir)
+
+    pipeline = PIPELINES[pipeline_name](so_config = config.SOLUTION_CONFIG, suffix=tag)
+
+    kfold = _read_kfold_data(data_dev_mode,
+                            config.params.cv_X_train_filepaths,
+                            config.params.cv_y_train_filepaths,
+                            config.params.cv_X_dev_filepaths,
+                            config.params.cv_y_dev_filepaths)
+
+    _cross_validate_auc(pipeline, kfold, features=None)
+
+    
+    
+
 def predict_and_submit(pipeline_name, suffix, pipeline, train_filepath, test_filepath, is_submit=False):
     logger.info('PREDICT...')
     
@@ -189,3 +215,87 @@ def _read_data(data_dev_mode, train_filepath, test_filepath):
     logger.info('Reading done!')
     return raw_data
 
+def _read_kfold_data(data_dev_mode, cv_X_train_filepaths, cv_y_train_filepaths, cv_X_dev_filepaths, cv_y_dev_filepaths):
+    logger.info('Reading kfold data...')
+    if data_dev_mode:
+        nrows = config.DEV_SAMPLE_SIZE
+        logger.info(f'Running in "dev-mode" with sample size of {nrows}')
+    else:
+        nrows = None
+
+    kfold = []
+
+    for i in range(0,len(cv_X_train_filepaths)):
+        X_train = pd.read_csv(cv_X_train_filepaths[i], nrows=nrows)
+        y_train = pd.read_csv(cv_y_train_filepaths[i], nrows=nrows).values.reshape(-1,)
+        X_dev = pd.read_csv(cv_X_dev_filepaths[i], nrows=nrows)
+        y_dev = pd.read_csv(cv_y_dev_filepaths[i], nrows=nrows).values.reshape(-1,)
+        kfold.append({
+            "X_train":X_train,
+            "y_train":y_train,
+            "X_dev":X_dev,
+            "y_dev":y_dev
+        })
+
+    logger.info('Done reading kfold data.')
+    return kfold
+
+
+def _cross_validate_auc(model, kfold, features=None, **clf_params):
+        train_tprs = []
+        train_aucs = []
+        train_mean_fpr = np.linspace(0, 1, 100)
+        dev_tprs = []
+        dev_aucs = []
+        dev_mean_fpr = np.linspace(0, 1, 100)
+
+        fig, ax = plt.subplots()
+        fig.set_size_inches((16,10))
+        for i in range(0, len(kfold)):
+          print("{}/{}".format(i+1, len(kfold)))
+          kf = kfold[i]
+          X_train_kf, y_train_kf = kf["X_train"].copy(), kf["y_train"].copy()
+          X_dev_kf, y_dev_kf = kf["X_dev"].copy(), kf["y_dev"].copy()
+          if features is not None:
+            X_train_kf = X_train_kf[features]
+            X_dev_kf = X_dev_kf[features]
+
+          model.fit(X_train_kf, y_train_kf, **clf_params)
+          # plot train
+          train_display = plot_roc_curve(model, X_train_kf, y_train_kf,
+                               name='Train ROC fold {}'.format(i),
+                               alpha=0.6, lw=1, ax=ax)
+          train_interp_tpr = interp(train_mean_fpr, train_display.fpr, train_display.tpr)
+          train_interp_tpr[0] = 0.0
+          train_tprs.append(train_interp_tpr)
+          train_aucs.append(train_display.roc_auc)
+          # plot dev
+          dev_display = plot_roc_curve(model, X_dev_kf, y_dev_kf,
+                               name='Dev ROC fold {}'.format(i),
+                               alpha=0.6, lw=1, ax=ax)
+          dev_interp_tpr = interp(dev_mean_fpr, dev_display.fpr, dev_display.tpr)
+          dev_interp_tpr[0] = 0.0
+          dev_tprs.append(dev_interp_tpr)
+          dev_aucs.append(dev_display.roc_auc)
+  
+        # plot mean train
+        train_mean_tpr = np.mean(train_tprs, axis=0)
+        train_mean_tpr[-1] = 1.0
+        train_mean_auc = auc(train_mean_fpr, train_mean_tpr)
+        train_std_auc = np.std(train_aucs)
+        ax.plot(train_mean_fpr, train_mean_tpr, color='r',
+              label=r'Train Mean ROC (AUC = %0.2f $\pm$ %0.2f)' % (train_mean_auc, train_std_auc),
+              lw=2, alpha=1)
+        # plot mean dev
+        dev_mean_tpr = np.mean(dev_tprs, axis=0)
+        dev_mean_tpr[-1] = 1.0
+        dev_mean_auc = auc(dev_mean_fpr, dev_mean_tpr)
+        dev_std_auc = np.std(dev_aucs)
+        ax.plot(dev_mean_fpr, dev_mean_tpr, color='b',
+              label=r'Dev Mean ROC (AUC = %0.2f $\pm$ %0.2f)' % (dev_mean_auc, dev_std_auc),
+              lw=2, alpha=1)
+  
+        ax.set(xlim=[-0.05, 1.05], ylim=[-0.05, 1.05],
+             title="Receiver operating characteristic example")
+        ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+        plt.show()

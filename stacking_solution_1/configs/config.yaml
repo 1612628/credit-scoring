@@ -5,6 +5,31 @@ parameters:
   train_preprocessed_filepath: './input/train_input_preprocessed.csv'
   test_preprocessed_filepath: './input/test_input_preprocessed.csv'
   first_level_oof_predictions_dir: './models/stacking_1/oof'
+  cv_X_train_filepaths:
+    - './cv_input/X_train_multi_1.csv'
+    - './cv_input/X_train_multi_2.csv'
+    - './cv_input/X_train_multi_3.csv'
+    - './cv_input/X_train_multi_4.csv'
+    - './cv_input/X_train_multi_5.csv'
+  cv_y_train_filepaths:
+    - './cv_input/y_train_multi_1.csv'
+    - './cv_input/y_train_multi_2.csv'
+    - './cv_input/y_train_multi_3.csv'
+    - './cv_input/y_train_multi_4.csv'
+    - './cv_input/y_train_multi_5.csv'
+  cv_X_dev_filepaths:
+    - './cv_input/X_dev_multi_1.csv'
+    - './cv_input/X_dev_multi_2.csv'
+    - './cv_input/X_dev_multi_3.csv'
+    - './cv_input/X_dev_multi_4.csv'
+    - './cv_input/X_dev_multi_5.csv'
+  cv_y_dev_filepaths:
+    - './cv_input/y_dev_multi_1.csv'
+    - './cv_input/y_dev_multi_2.csv'
+    - './cv_input/y_dev_multi_3.csv'
+    - './cv_input/y_dev_multi_4.csv'
+    - './cv_input/y_dev_multi_5.csv'
+
   experiment_dir: './models/stacking_1/exp'
   params_dir: './models/params'
 # Data preparation
