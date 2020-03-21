@@ -146,11 +146,11 @@ def preprocessing_cv(data_dev_mode, tag):
         kfold[i]["X_train"]= pd.concat([kfold[i]["X_train"], train_new_features], axis=1)
         kfold[i]["X_dev"]= pd.concat([kfold[i]["X_dev"], test_new_features], axis=1)
 
-        logger.info(f'PREPROCESSING, Fold {i}, Oversampling...')
+#        logger.info(f'PREPROCESSING, Fold {i}, Oversampling...')
         temp_train_set = kfold[i]["X_train"]
         temp_y = kfold[i]["y_train"]
         over_sampling = blocks.over_sample_block(tag)
-        kfold[i]["X_train"], kfold[i]["y_train"] = over_sampling.transformer.fit_transform(kfold[i]["X_train"], kfold[i]["y_train"])
+#        kfold[i]["X_train"], kfold[i]["y_train"] = over_sampling.transformer.fit_transform(kfold[i]["X_train"], kfold[i]["y_train"])
 
         logger.info(f'PREPROCESSING, Fold {i}, Feature selection...')
         selection = blocks.selection_block(config.SOLUTION_CONFIG, tag)
