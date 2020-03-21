@@ -71,7 +71,7 @@ def preprocessing(data_dev_mode, tag, train_filepath, test_filepath, train_prepr
     temp_train_set = train_set
     temp_y = y
     over_sampling = blocks.over_sample_block(tag)
-    train_set, y = over_sampling.transformer.fit_transform(train_set, y)
+    # train_set, y = over_sampling.transformer.fit_transform(train_set, y)
 
     logger.info('PREPROCESSING, Feature selection...')
     selection = blocks.selection_block(config.SOLUTION_CONFIG, tag)
