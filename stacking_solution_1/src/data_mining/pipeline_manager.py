@@ -283,9 +283,9 @@ def _read_kfold_data(data_dev_mode, cv_X_train_filepaths, cv_y_train_filepaths, 
 
     for i in range(0,len(cv_X_train_filepaths)):
         X_train = pd.read_csv(cv_X_train_filepaths[i], nrows=nrows)
-        y_train = pd.read_csv(cv_y_train_filepaths[i], nrows=nrows).values.reshape(-1,)
+        y_train = pd.read_csv(cv_y_train_filepaths[i], nrows=nrows, header=None).values.reshape(-1,)
         X_dev = pd.read_csv(cv_X_dev_filepaths[i], nrows=nrows)
-        y_dev = pd.read_csv(cv_y_dev_filepaths[i], nrows=nrows).values.reshape(-1,)
+        y_dev = pd.read_csv(cv_y_dev_filepaths[i], nrows=nrows, header=None).values.reshape(-1,)
         kfold.append({
             "X_train":X_train,
             "y_train":y_train,
