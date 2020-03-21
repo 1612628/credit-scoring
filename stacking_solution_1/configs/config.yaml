@@ -11,18 +11,39 @@ parameters:
     - './cv_input/X_train_multi_3.csv'
     - './cv_input/X_train_multi_4.csv'
     - './cv_input/X_train_multi_5.csv'
+  cv_X_train_prerprocessed_filepaths:
+    - './cv_input/X_train_preprocessed_1.csv'
+    - './cv_input/X_train_preprocessed_2.csv'
+    - './cv_input/X_train_preprocessed_3.csv'
+    - './cv_input/X_train_preprocessed_4.csv'
+    - './cv_input/X_train_preprocessed_5.csv'
+
   cv_y_train_filepaths:
     - './cv_input/y_train_multi_1.csv'
     - './cv_input/y_train_multi_2.csv'
     - './cv_input/y_train_multi_3.csv'
     - './cv_input/y_train_multi_4.csv'
     - './cv_input/y_train_multi_5.csv'
+  cv_y_train_preprocessed_filepaths:
+    - './cv_input/y_train_preprocessed_1.csv'
+    - './cv_input/y_train_preprocessed_2.csv'
+    - './cv_input/y_train_preprocessed_3.csv'
+    - './cv_input/y_train_preprocessed_4.csv'
+    - './cv_input/y_train_preprocessed_5.csv'
+
   cv_X_dev_filepaths:
     - './cv_input/X_dev_multi_1.csv'
     - './cv_input/X_dev_multi_2.csv'
     - './cv_input/X_dev_multi_3.csv'
     - './cv_input/X_dev_multi_4.csv'
     - './cv_input/X_dev_multi_5.csv'
+  cv_X_dev_preprocessed_filepaths:
+    - './cv_input/X_dev_preprocessed_1.csv'
+    - './cv_input/X_dev_preprocessed_2.csv'
+    - './cv_input/X_dev_preprocessed_3.csv'
+    - './cv_input/X_dev_preprocessed_4.csv'
+    - './cv_input/X_dev_preprocessed_5.csv'
+
   cv_y_dev_filepaths:
     - './cv_input/y_dev_multi_1.csv'
     - './cv_input/y_dev_multi_2.csv'

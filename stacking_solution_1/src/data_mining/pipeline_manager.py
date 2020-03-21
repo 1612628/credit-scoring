@@ -84,8 +84,8 @@ def preprocessing(data_dev_mode, tag, train_filepath, test_filepath, train_prepr
     gc.collect()
 
     logger.info('')
-    train_set.to_csv(train_preprocessed_filepath)
-    test_set.to_csv(test_preprocessed_filepath)
+    train_set.to_csv(train_preprocessed_filepath, index=False)
+    test_set.to_csv(test_preprocessed_filepath, index=False)
 
     logger.info(f'PREPROCESSING, Train set is dumped into path: {train_preprocessed_filepath}')
     logger.info(f'PREPROCESSING, Test set is dumped into path: {test_preprocessed_filepath}')
@@ -117,6 +117,62 @@ def train(pipeline_name, data_dev_mode, tag, train_filepath, test_filepath):
     gc.collect()
     return pipeline 
 
+def preprocessing_cv(data_dev_mode, tag):
+    logger.info('PREPROCESSING CV...')
+    
+    if bool(config.params.clean_experiment_directory_before_training) and os.path.isdir(config.params.experiment_dir):
+        logger.info('Cleaning experiment directory...')
+        shutil.rmtree(config.params.experiment_dir)
+
+    kfold = _read_kfold_data(data_dev_mode,
+                            config.params.cv_X_train_filepaths,
+                            config.params.cv_y_train_filepaths,
+                            config.params.cv_X_dev_filepaths,
+                            config.params.cv_y_dev_filepaths)
+    
+    for i in range(0, len(kfold)):
+        logger.info(f'PREPROCESSING CV, Fold {i}, Train shape: {kfold[i]["X_train"].shape}')
+        logger.info(f'PREPROCESSING CV, Fold {i}, y train shape: {kfold[i]["y_train"].shape}')
+        logger.info(f'PREPROCESSING CV, Fold {i}, Dev shape: {kfold[i]["X_dev"].shape}')
+        logger.info(f'PREPROCESSING CV, Fold {i}, y dev shape: {kfold[i]["y_dev"].shape}')
+        
+        logger.info(f'PREPROCESSING CV, Fold {i}, Feature extraction...')
+        pca_extract = blocks.pca_block(tag)
+        train_new_features = pd.DataFrame(pca_extract.transformer.fit_transform(kfold[i]["X_train"]))
+        test_new_features = pd.DataFrame(pca_extract.transformer.fit_transform(kfold[i]["X_dev"]))
+        kfold[i]["X_train"]= pd.concat([kfold[i]["X_train"], train_new_features], axis=1)
+        kfold[i]["X_dev"]= pd.concat([kfold[i]["X_dev"], test_new_features], axis=1)
+
+        logger.info(f'PREPROCESSING, Fold {i}, Oversampling...')
+        temp_train_set = kfold[i]["X_train"]
+        temp_y = kfold[i]["y_train"]
+        over_sampling = blocks.over_sample_block(tag)
+        kfold[i]["X_train"], kfold[i]["y_train"] = over_sampling.transformer.fit_transform(kfold[i]["X_train"], kfold[i]["y_train"])
+
+        logger.info(f'PREPROCESSING, Fold {i}, Feature selection...')
+        selection = blocks.selection_block(config.SOLUTION_CONFIG, tag)
+        selection.transformer.fit(kfold[i]["X_train"], kfold[i]["y_train"], kfold[i]["X_dev"])
+        cols_selected = selection.transformer.transform(kfold[i]["X_train"])
+        logger.info(f'PREPROCESSING, Fold {i}, Feature selection, number of features: {len(cols_selected)}')
+        kfold[i]["X_train"]= kfold[i]["X_train"][cols_selected]
+        kfold[i]["X_dev"]= kfold[i]["X_dev"][cols_selected]
+    
+        del pca_extract, train_new_features, test_new_features, selection, temp_train_set, temp_y
+        gc.collect()
+
+        logger.info('')
+        kfold[i]["X_train"].to_csv(config.params.cv_X_train_preprocessed_filepaths[i], index=False)
+        kfold[i]["y_train"] = pd.DataFrame(kfold[i]["y_train"])
+        kfold[i]["y_train"].to_csv(config.params.cv_y_train_preprocessed_filepaths[i], index=False)
+        kfold[i]["X_dev"].to_csv(config.params.cv_X_dev_preprocessed_filepaths[i], index=False)
+
+        logger.info(f'PREPROCESSING CV, Fold {i}, Train set is dumped into path: {config.params.cv_X_train_preprocessed_filepaths[i]}')
+        logger.info(f'PREPROCESSING CV, Fold {i}, y train set is dumped into path: {config.params.cv_y_train_preprocessed_filepaths[i]}')
+        logger.info(f'PREPROCESSING CV, Fold {i}, Dev set is dumped into path: {config.params.cv_X_dev_preprocessed_filepaths[i]}')
+        logger.info(f'DONE PREPROCESSING CV, Fold {i},...')
+   
+    logger.info('DONE PREPROCESSING CV...')
+
 def train_cv(pipeline_name, data_dev_mode, tag):
     logger.info('TRAINING CV ...')
     
@@ -127,15 +183,12 @@ def train_cv(pipeline_name, data_dev_mode, tag):
     pipeline = PIPELINES[pipeline_name](so_config = config.SOLUTION_CONFIG, suffix=tag)
 
     kfold = _read_kfold_data(data_dev_mode,
-                            config.params.cv_X_train_filepaths,
-                            config.params.cv_y_train_filepaths,
-                            config.params.cv_X_dev_filepaths,
+                            config.params.cv_X_train_preprocessed_filepaths,
+                            config.params.cv_y_train_preprocessed_filepaths,
+                            config.params.cv_X_dev_prerprocessed_filepaths,
                             config.params.cv_y_dev_filepaths)
 
     _cross_validate_auc(pipeline, kfold, features=None)
-
-    
-    
 
 def predict_and_submit(pipeline_name, suffix, pipeline, train_filepath, test_filepath, is_submit=False):
     logger.info('PREDICT...')
@@ -239,7 +292,6 @@ def _read_kfold_data(data_dev_mode, cv_X_train_filepaths, cv_y_train_filepaths, 
 
     logger.info('Done reading kfold data.')
     return kfold
-
 
 def _cross_validate_auc(model, kfold, features=None, **clf_params):
         train_tprs = []
