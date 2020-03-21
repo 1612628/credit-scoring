@@ -165,8 +165,8 @@ def preprocessing_cv(data_dev_mode, tag):
 
         logger.info('')
         kfold[i]["X_train"].to_csv(config.params.cv_X_train_preprocessed_filepaths[i], index=False)
-        kfold[i]["y_train"] = pd.Series(kfold[i]["y_train"]).drop(axis=0, index=[0])
-        kfold[i]["y_train"].to_csv(config.params.cv_y_train_preprocessed_filepaths[i], index=False)
+        kfold[i]["y_train"] = pd.Series(kfold[i]["y_train"])
+        kfold[i]["y_train"].to_csv(config.params.cv_y_train_preprocessed_filepaths[i], index=False, header=False)
         kfold[i]["X_dev"].to_csv(config.params.cv_X_dev_preprocessed_filepaths[i], index=False)
 
         logger.info(f'PREPROCESSING CV, Fold {i}, Train set is dumped into path: {config.params.cv_X_train_preprocessed_filepaths[i]}')
