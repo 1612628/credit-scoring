@@ -11,7 +11,7 @@ parameters:
     - './cv_input/X_train_multi_3.csv'
     - './cv_input/X_train_multi_4.csv'
     - './cv_input/X_train_multi_5.csv'
-  cv_X_train_prerprocessed_filepaths:
+  cv_X_train_preprocessed_filepaths:
     - './cv_input/X_train_preprocessed_1.csv'
     - './cv_input/X_train_preprocessed_2.csv'
     - './cv_input/X_train_preprocessed_3.csv'
