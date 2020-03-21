@@ -188,7 +188,7 @@ def train_cv(pipeline_name, data_dev_mode, tag):
     kfold = _read_kfold_data(data_dev_mode,
                             config.params.cv_X_train_preprocessed_filepaths,
                             config.params.cv_y_train_preprocessed_filepaths,
-                            config.params.cv_X_dev_prerprocessed_filepaths,
+                            config.params.cv_X_dev_preprocessed_filepaths,
                             config.params.cv_y_dev_filepaths)
 
     _cross_validate_auc(pipeline, kfold, features=None)
