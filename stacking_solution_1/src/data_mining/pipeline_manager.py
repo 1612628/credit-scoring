@@ -33,7 +33,7 @@ class PipelineManager:
         preprocessing(False, tag, train_filepath, test_filepath, train_preprocessed_filepath, test_preprocessed_filepath)
 
     def preprocessing_cv(self, data_dev_mode, tag):
-        preprocessing(data_dev_mode, tag)
+        preprocessing_cv(data_dev_mode, tag)
 
     def train(self, pipeline_name, data_dev_mode, tag, train_filepath=config.params.train_preprocessed_filepath, test_filepath=config.params.test_preprocessed_filepath):
         self.pipe = train(pipeline_name, data_dev_mode, tag, train_filepath, test_filepath)
