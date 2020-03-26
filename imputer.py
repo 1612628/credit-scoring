@@ -129,7 +129,6 @@ class BPCA(base.BaseEstimator):
             # get q-dimensional of diag eigen_vas and eigen_vecs 
             eigen_vas = np.diag(eigen_vas[:self.q])
             eigen_vecs = eigen_vecs[:, :self.q]
-        
             # Latent variables z
             self.z = self.pca.fit_transform(X[:self.batch_size, :self.q]).reshape(self.batch_size, self.q)
 
@@ -276,7 +275,7 @@ class Imputer(object):
     def __init__(self):
         self._pca = BPCA()
     
-    def fit(self, data=None,batch_size=100, epochs = 10, err_threshold = 1e-2, full_dimens = True, verbose=False, print_every=10):
+    def fit(self, data=None,batch_size=100, epochs = 10, early_stopping = 20, err_threshold = 1e-4, full_dimens = True, verbose=False, print_every=10):
         """
         Fit observations 
 
@@ -289,6 +288,8 @@ class Imputer(object):
             Number of samples in each batch. batch_size must be <= N
         epochs: int (required, default = 100)
             The number of times running algorithms
+        early_stopping: int
+            The number of times that will break algorithm if there is no more change in BPCA 
         err_threshold: float (required, default = 1e-2)
             Threshold used for stopping running if error residual (mse) < err_threshold
         verbose: bool (options, default = False)
@@ -325,6 +326,8 @@ class Imputer(object):
         _data[_missing] = row_means[_missing]
         _data = np.nan_to_num(_data)
 
+        early_stopping_count = 0
+
         for epoch in range(epochs):
 
             self._pca.fit(X=_data,batch_size=batch_size,verbose=verbose, print_every = print_every, no_repeat=False)
@@ -335,7 +338,9 @@ class Imputer(object):
             
             mse_residual = mse - _prev_mse
             if np.abs(mse_residual) < err_threshold:
-                break
+                early_stopping_count +=1
+                if (early_stopping_count >= early_stopping):
+                    break
 
             if mse_residual < 0:
                 _data[_missing] = temp[_missing]
