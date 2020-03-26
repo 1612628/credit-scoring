@@ -275,7 +275,7 @@ class Imputer(object):
     def __init__(self):
         self._pca = BPCA()
     
-    def fit(self, data=None,batch_size=100, epochs = 10, early_stopping = 20, err_threshold = 1e-4, full_dimens = True, verbose=False, print_every=10):
+    def fit(self, data=None,batch_size=100, epochs = 10, early_stopping = 20, err_threshold = 1e-5, full_dimens = True, verbose=False, print_every=10):
         """
         Fit observations 
 
@@ -341,7 +341,9 @@ class Imputer(object):
                 early_stopping_count +=1
                 if (early_stopping_count >= early_stopping):
                     break
-
+            else:
+                early_stopping_count = 0
+            
             if mse_residual < 0:
                 _data[_missing] = temp[_missing]
                 _prev_mse = mse
