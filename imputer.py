@@ -1,6 +1,7 @@
 import numpy as np
 import gc
 from sklearn import base
+from sklearn.decomposition import PCA
 import scipy
 
 class BPCA(base.BaseEstimator):
@@ -27,6 +28,7 @@ class BPCA(base.BaseEstimator):
         self.beta = beta
 
         self.X = None
+        self.pca = PCA()
 
     def iterations(self, N=None, batch_size=None):
         """
@@ -112,14 +114,40 @@ class BPCA(base.BaseEstimator):
         self.ed = []
         self.batch_size = int(min(batch_size,self.N))
 
+        # sample mean (dx1)
+        self.mu = np.nanmean(X, axis=0).reshape(self.d, 1)
+        # sample covariance matrix (dxd)
+        self.S = np.cov(X.T).reshape(self.d, self.d)
+        # SVD of S
+        eigen_vas, eigen_vecs = np.linalg.eig(self.S)
+        eigen_vecs = eigen_vecs[:, eigen_vas.argsort()[::-1]]
+        eigen_vas = np.sort(eigen_vas)[::-1]
+        # diag of sigma_square error 
+        sigma_square = np.sum(eigen_vas[self.q:])/(self.d-self.q)
+        # get q-dimensional of diag eigen_vas and eigen_vecs 
+        eigen_vas = np.diag(eigen_vas[:self.q])
+        eigen_vecs = eigen_vecs[:, :self.q]
+        
+        # Latent variables z
+        self.z = self.pca.fit_transform(X[:self.batch_size, :self.q]).reshape(self.batch_size, self.q)
+
         if (no_repeat == True) or (self.X is None):        
             # Variational parameters
-            self.mean_z = np.random.randn(self.q, self.batch_size) # latent variable
-            self.cov_z = np.eye(self.q)
-            self.mean_mu = np.random.rand(self.d,1)
-            self.cov_mu = np.eye(self.d)
-            self.mean_w = np.random.randn(self.d, self.q)
-            self.cov_w = np.eye(self.q)
+            # self.mean_z = np.random.randn(self.q, self.batch_size) # latent variable
+            # self.cov_z = np.eye(self.q)
+            self.mean_z = self.z # latent variable
+            self.cov_z = np.cov(self.z.T).reshape(self.q, self.q)
+            
+            # self.mean_mu = np.random.rand(self.d,1)
+            # self.cov_mu = np.eye(self.d)
+            self.mean_mu = self.mu
+            self.cov_mu = self.S.reshape(self.d, self.d)
+            
+            # self.mean_w = np.random.randn(self.d, self.q)
+            # self.cov_w = np.eye(self.q)
+            self.mean_w = np.dot(eigen_vecs, np.sqrt(eigen_vas - sigma_square*np.eye(self.q)).reshape(self.q, self.q)).reshape(self.d, self.q)
+            self.cov_w = np.cov(self.mean_w.T).reshape(self.q, self.q)
+
             self.a_alpha_tilde = self.a_alpha + self.d
             self.b_alpha_tilde = np.abs(np.random.randn(self.q))
             self.a_tau_tilde = self.a_tau + self.N * self.d / 2
@@ -136,7 +164,7 @@ class BPCA(base.BaseEstimator):
             self.update()
             loglikelihoods[it] = self.calculate_log_likelihood()
             if verbose and it%print_every == 0:
-                print(f'Iter {it}, LL: {loglikelihoods[it]}, alpha: {str(self.alpha)}')
+                print(f'Iter {it}, LL: {loglikelihoods[it]}')
 
         self.captured_dims()
     
