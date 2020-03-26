@@ -114,24 +114,25 @@ class BPCA(base.BaseEstimator):
         self.ed = []
         self.batch_size = int(min(batch_size,self.N))
 
-        # sample mean (dx1)
-        self.mu = np.nanmean(X, axis=0).reshape(self.d, 1)
-        # sample covariance matrix (dxd)
-        self.S = np.cov(X.T).reshape(self.d, self.d)
-        # SVD of S
-        eigen_vas, eigen_vecs = np.linalg.eig(self.S)
-        eigen_vecs = eigen_vecs[:, eigen_vas.argsort()[::-1]]
-        eigen_vas = np.sort(eigen_vas)[::-1]
-        # diag of sigma_square error 
-        sigma_square = np.sum(eigen_vas[self.q:])/(self.d-self.q)
-        # get q-dimensional of diag eigen_vas and eigen_vecs 
-        eigen_vas = np.diag(eigen_vas[:self.q])
-        eigen_vecs = eigen_vecs[:, :self.q]
         
-        # Latent variables z
-        self.z = self.pca.fit_transform(X[:self.batch_size, :self.q]).reshape(self.batch_size, self.q)
-
         if (no_repeat == True) or (self.X is None):        
+            # sample mean (dx1)
+            self.mu = np.nanmean(X, axis=0).reshape(self.d, 1)
+            # sample covariance matrix (dxd)
+            self.S = np.cov(X.T).reshape(self.d, self.d)
+            # SVD of S
+            eigen_vas, eigen_vecs = np.linalg.eig(self.S)
+            eigen_vecs = eigen_vecs[:, eigen_vas.argsort()[::-1]]
+            eigen_vas = np.sort(eigen_vas)[::-1]
+            # diag of sigma_square error 
+            sigma_square = np.sum(eigen_vas[self.q:])/(self.d-self.q)
+            # get q-dimensional of diag eigen_vas and eigen_vecs 
+            eigen_vas = np.diag(eigen_vas[:self.q])
+            eigen_vecs = eigen_vecs[:, :self.q]
+        
+            # Latent variables z
+            self.z = self.pca.fit_transform(X[:self.batch_size, :self.q]).reshape(self.batch_size, self.q)
+
             # Variational parameters
             # self.mean_z = np.random.randn(self.q, self.batch_size) # latent variable
             # self.cov_z = np.eye(self.q)
