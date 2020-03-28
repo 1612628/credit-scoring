@@ -60,14 +60,14 @@ def preprocessing(data_dev_mode, tag, train_filepath, test_filepath, train_prepr
     y = train_set[config.TARGET_COL].values.reshape(-1,)
     train_set = train_set.drop(columns=config.TARGET_COL)
 
-    logger.info('PREPROCESSING, Feature extraction...')
+    # logger.info('PREPROCESSING, Feature extraction...')
     pca_extract = blocks.pca_block(tag)
     train_new_features = pd.DataFrame(pca_extract.transformer.fit_transform(train_set))
     test_new_features = pd.DataFrame(pca_extract.transformer.fit_transform(test_set))
-    train_set = pd.concat([train_set, train_new_features], axis=1)
-    test_set = pd.concat([test_set, test_new_features], axis=1)
+    # train_set = pd.concat([train_set, train_new_features], axis=1)
+    # test_set = pd.concat([test_set, test_new_features], axis=1)
 
-    logger.info('PREPROCESSING, Oversampling...')
+    # logger.info('PREPROCESSING, Oversampling...')
     temp_train_set = train_set
     temp_y = y
     over_sampling = blocks.over_sample_block(tag)
@@ -126,9 +126,8 @@ def preprocessing_cv(data_dev_mode, tag):
     if bool(config.params.clean_experiment_directory_before_training) and os.path.isdir(config.params.experiment_dir):
         logger.info('Cleaning experiment directory...')
         shutil.rmtree(config.params.experiment_dir)
-
     kfold = _read_kfold_data(data_dev_mode,
-                            config.params.cv_X_train_filepaths,
+                                config.params.cv_X_train_filepaths,
                             config.params.cv_y_train_filepaths,
                             config.params.cv_X_dev_filepaths,
                             config.params.cv_y_dev_filepaths)
@@ -139,18 +138,23 @@ def preprocessing_cv(data_dev_mode, tag):
         logger.info(f'PREPROCESSING CV, Fold {i}, Dev shape: {kfold[i]["X_dev"].shape}')
         logger.info(f'PREPROCESSING CV, Fold {i}, y dev shape: {kfold[i]["y_dev"].shape}')
         
-        logger.info(f'PREPROCESSING CV, Fold {i}, Feature extraction...')
+        # logger.info(f'PREPROCESSING CV, Fold {i}, Feature extraction...')
         pca_extract = blocks.pca_block(tag)
         train_new_features = pd.DataFrame(pca_extract.transformer.fit_transform(kfold[i]["X_train"]))
         test_new_features = pd.DataFrame(pca_extract.transformer.fit_transform(kfold[i]["X_dev"]))
-        kfold[i]["X_train"]= pd.concat([kfold[i]["X_train"], train_new_features], axis=1)
-        kfold[i]["X_dev"]= pd.concat([kfold[i]["X_dev"], test_new_features], axis=1)
+        # kfold[i]["X_train"]= pd.concat([kfold[i]["X_train"], train_new_features], axis=1)
+        # kfold[i]["X_dev"]= pd.concat([kfold[i]["X_dev"], test_new_features], axis=1)
 
 #        logger.info(f'PREPROCESSING, Fold {i}, Oversampling...')
         temp_train_set = kfold[i]["X_train"]
         temp_y = kfold[i]["y_train"]
         over_sampling = blocks.over_sample_block(tag)
 #        kfold[i]["X_train"], kfold[i]["y_train"] = over_sampling.transformer.fit_transform(kfold[i]["X_train"], kfold[i]["y_train"])
+
+        logger.info(f'PREPROCESSING, KMeanFeaturizer...')
+        kmeans = blocks.kmeans_block(config.SOLUTION_CONFIG, tag)
+        cluster = kmeans.transformer.fit_transform(kfold[i]["X_train"])
+        kfold[i]["X_train"]['cluster'] = cluster
 
         logger.info(f'PREPROCESSING, Fold {i}, Feature selection...')
         selection = blocks.selection_block(config.SOLUTION_CONFIG, tag)

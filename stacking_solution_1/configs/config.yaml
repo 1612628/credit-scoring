@@ -70,6 +70,9 @@ parameters:
 # Preprocessing
   fill_missing: False
   fill_value: 0
+  k_means__k: 100
+  k_means__target_scale: 2.0
+  
 
 # Feature extraction
   use_nan_count: True
@@ -82,21 +85,21 @@ parameters:
   lgbm__boosting_type: goss
   lgbm__objective: binary
   lgbm__metric: auc
-  lgbm__number_boosting_rounds: 12
+  lgbm__number_boosting_rounds: 15
   lgbm__early_stopping_rounds: 20
-  lgbm__learning_rate: 0.16
+  lgbm__learning_rate: 0.28
   lgbm__max_bin: 1024
-  lgbm__max_depth: 9
-  lgbm__num_leaves: 6
-  lgbm__min_data_in_leaf: 80
+  lgbm__max_depth: 12
+  lgbm__num_leaves: 10
+  lgbm__min_data_in_leaf: 100
   lgbm__bagging_fraction: 1.
   lgbm__bagging_freq: 1
-  lgbm__feature_fraction: 0.7
+  lgbm__feature_fraction: 0.65
   lgbm__min_gain_to_split: 0.0
-  lgbm__lambda_l1: 250.0
-  lgbm__lambda_l2: 210.0
+  lgbm__lambda_l1: 500.0
+  lgbm__lambda_l2: 250.0
   lgbm__is_unbalanced: True 
-  lgbm__scale_pos_weight: 60.7
+  lgbm__scale_pos_weight: 100.7
 # Light GBM hyperparameters tuning
   tuning_lgbm__boosting_type: [goss]
   tuning_lgbm__objective: [binary]

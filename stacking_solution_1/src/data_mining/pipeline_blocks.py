@@ -9,7 +9,7 @@ from sklearn.ensemble import StackingClassifier
 from sklearn.decomposition import PCA
 from sklearn.feature_selection import RFECV
 
-from .models import XGBoost, LightGBM, NeuralNetwork, CatBoost, SklearnClassifier, FeatureSelection, SMOte
+from .models import XGBoost, LightGBM, NeuralNetwork, CatBoost, SklearnClassifier, FeatureSelection, SMOte, KMeansFeaturizer
 from ..common.utils import get_logger
 
 logger = get_logger()
@@ -20,6 +20,14 @@ def pca_block(suffix):
   pca = PCA()
 
   return AttrDict({'name':name, 'transformer':pca})
+
+def kmeans_block(so_config, suffix):
+  name = f'kmeans{suffix}'
+
+  kmeans = KMeansFeaturizer(**so_config.preprocessing.k_means)
+
+  return AttrDict({'name': name, 'transformer':kmeans})
+
 
 def over_sample_block(suffix):
   name = f'smote{suffix}'
