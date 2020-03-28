@@ -82,7 +82,7 @@ class KMeansFeaturizer:
     km_model_pretrain = KMeans(n_clusters=self.k_, random_state=self.random_state_, n_init=20, **kwargs)
     km_model_pretrain.fit(data)
 
-    km_model = KMeans(n_clusters=self.k_, init=km_model_pretrain.cluster_centers_[:,:-2], n_init=20, random_state=self.random_state_, **kawrgs)
+    km_model = KMeans(n_clusters=self.k_, init=km_model_pretrain.cluster_centers_[:,:-2], n_init=20, random_state=self.random_state_, **kwargs)
     km_model.fit(X)
     self.cluster_centers_ = km_model.cluster_centers_
     self.km_model_ = km_model
