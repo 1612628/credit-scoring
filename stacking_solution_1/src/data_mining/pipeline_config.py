@@ -25,7 +25,7 @@ BOOL_COLS = ['FIELD_1', 'FIELD_2', 'FIELD_12', 'FIELD_14', 'FIELD_15', 'FIELD_18
 SOLUTION_CONFIG = AttrDict({
     'preprocessing':{
         'k_means':{
-            'k': param_eval(params.k_means__k)
+            'k': param_eval(params.k_means__k),
             'target_scale': param_eval(params.k_means__target_scale)
         }
     },

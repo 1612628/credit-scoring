@@ -153,8 +153,12 @@ def preprocessing_cv(data_dev_mode, tag):
 
         logger.info(f'PREPROCESSING, KMeanFeaturizer...')
         kmeans = blocks.kmeans_block(config.SOLUTION_CONFIG, tag)
-        cluster = kmeans.transformer.fit_transform(kfold[i]["X_train"])
-        kfold[i]["X_train"]['cluster'] = cluster
+        train_cluster = kmeans.transformer.fit_transform(kfold[i]["X_train"], kfold[i]["y_train"])
+        dev_cluster = kmeans.transformer.transform(kfold[i]["X_dev"])
+        kfold[i]["X_train"] = pd.concat([kfold[i]["X_train"], pd.DataFrame(train_cluster)], axis=1, ignore_index=True)
+#        kfold[i]["X_train"]['cluster'] = train_cluster
+        kfold[i]["X_dev"] = pd.concat([kfold[i]["X_dev"], pd.DataFrame(dev_cluster)], axis=1, ignore_index=True)
+#        kfold[i]["X_dev"]['cluster'] = dev_cluster
 
         logger.info(f'PREPROCESSING, Fold {i}, Feature selection...')
         selection = blocks.selection_block(config.SOLUTION_CONFIG, tag)

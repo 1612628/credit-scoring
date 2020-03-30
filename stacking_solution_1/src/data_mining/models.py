@@ -21,6 +21,7 @@ from sklearn.feature_selection import RFECV
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 from sklearn.cluster import KMeans
+from sklearn.preprocessing import normalize
 
 
 from imblearn.over_sampling import SMOTE
@@ -358,7 +359,7 @@ class FeatureSelection(BaseEstimator, ClassifierMixin):
   def transform(self, X, *args, **kwargs):
     logger.info('FeatureSelection, transform')
 
-    rfecv_feas = set(self.rfecv_.support_)
+    rfecv_feas = set(X.columns[self.rfecv_.support_])
     covashift_feas = set(self.covariateshift_.transform(X))   
     
     logger.info('FeatureSelection, done transform')
@@ -479,7 +480,7 @@ class KMeansFeaturizer:
     km_model_pretrain = KMeans(n_clusters=self.k_, random_state=self.random_state_, n_init=20, **kwargs)
     km_model_pretrain.fit(data)
 
-    km_model = KMeans(n_clusters=self.k_, init=km_model_pretrain.cluster_centers_[:,:-2], n_init=20, random_state=self.random_state_, **kwargs)
+    km_model = KMeans(n_clusters=self.k_, init=km_model_pretrain.cluster_centers_[:,:-1], n_init=1, max_iter=1, random_state=self.random_state_, **kwargs)
     km_model.fit(X)
     self.cluster_centers_ = km_model.cluster_centers_
     self.km_model_ = km_model
@@ -487,59 +488,10 @@ class KMeansFeaturizer:
   
   def transform(self, X, **kwargs):
     cluster = self.km_model_.transform(X)
-    return cluster[:, np.newaxis]
+    return cluster
   
   def fit_transform(self, X, y=None, **kwargs):
-    self.fit(X,y,**kwargs).transform(X)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    return self.fit(X,y,**kwargs).transform(X)
 
 
 
