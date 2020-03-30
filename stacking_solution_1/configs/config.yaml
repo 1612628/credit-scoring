@@ -70,7 +70,7 @@ parameters:
 # Preprocessing
   fill_missing: False
   fill_value: 0
-  k_means__k: 100
+  k_means__k: 50
   k_means__target_scale: 2.0
   
 
