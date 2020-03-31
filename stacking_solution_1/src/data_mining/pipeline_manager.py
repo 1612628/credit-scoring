@@ -196,7 +196,8 @@ def woe_multiple_algos_test(data_dev_mode, tag):
     kfold = _get_KFold(data['train'], label, 5, random_state=config.RANDOM_SEED)
 
     for algo in ['LightGBM', 'CatBoost', 'XGBoost', 'RandomForest']:
-        _cross_validate_auc(algo, kfold, features=None)
+        pipeline = PIPELINES[algo](so_config = config.SOLUTION_CONFIG, suffix=tag)
+        _cross_validate_auc(pipeline, kfold, features=None)
 
 def _impute_sample(x, y):
     """
