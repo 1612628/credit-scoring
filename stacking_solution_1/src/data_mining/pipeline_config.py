@@ -27,6 +27,10 @@ SOLUTION_CONFIG = AttrDict({
         'k_means':{
             'k': param_eval(params.k_means__k),
             'target_scale': param_eval(params.k_means__target_scale)
+        },
+        'smote':{
+            'sampling_strategy': param_eval(params.smote__sampling_strategy),
+            'random_state': RANDOM_SEED
         }
     },
     'tuning':{

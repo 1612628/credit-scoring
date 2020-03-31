@@ -29,9 +29,9 @@ def kmeans_block(so_config, suffix):
   return AttrDict({'name': name, 'transformer':kmeans})
 
 
-def over_sample_block(suffix):
+def over_sample_block(so_config, suffix):
   name = f'smote{suffix}'
-  smote = SMOte(sampling_strategy=0.25, random_state=900031)
+  smote = SMOte(**so_config.preprocessing.smote)
 
   return AttrDict({'name':name, 'transformer':smote})
 

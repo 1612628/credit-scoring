@@ -4,6 +4,8 @@ parameters:
   test_filepath: './input/test_input_multi_imputed.csv'
   train_preprocessed_filepath: './input/train_input_preprocessed.csv'
   test_preprocessed_filepath: './input/test_input_preprocessed.csv'
+  train_woe_filepath: './input/train_woe_input.csv'
+  test_woe_filepath: './input/test_woe_input.csv'
   first_level_oof_predictions_dir: './models/stacking_1/oof'
   cv_X_train_filepaths:
     - './cv_input/X_train_multi_1.csv'
@@ -72,7 +74,7 @@ parameters:
   fill_value: 0
   k_means__k: 50
   k_means__target_scale: 2.0
-  
+  smote__sampling_strategy: 0.25
 
 # Feature extraction
   use_nan_count: True
