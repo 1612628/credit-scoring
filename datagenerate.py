@@ -173,6 +173,7 @@ class WOEBINS:
     return d3 
 
 
+
   def fit(self, data, target):
     return self 
     

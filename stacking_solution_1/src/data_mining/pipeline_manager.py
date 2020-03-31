@@ -46,6 +46,9 @@ class PipelineManager:
 
     def tuning(self, pipeline_name, tag, train_filepath=config.params.train_preprocessed_filepath, test_filepath=config.params.test_preprocessed_filepath):
         hyperparameter_tunning(pipeline_name, False, tag, train_filepath, test_filepath)
+    
+    def woe_algos_test(self, data_dev_mode, tag):
+        woe_multiple_algos_test(False, tag)
 
 def preprocessing(data_dev_mode, tag, train_filepath, test_filepath, train_preprocessed_filepath, test_preprocessed_filepath):
     logger.info('PREPROCESSING...')
@@ -70,7 +73,7 @@ def preprocessing(data_dev_mode, tag, train_filepath, test_filepath, train_prepr
     # logger.info('PREPROCESSING, Oversampling...')
     temp_train_set = train_set
     temp_y = y
-    over_sampling = blocks.over_sample_block(tag)
+    over_sampling = blocks.over_sample_block(config.SOLUTION_CONFIG, tag)
     # train_set, y = over_sampling.transformer.fit_transform(train_set, y)
 
     logger.info('PREPROCESSING, Feature selection...')
@@ -145,20 +148,20 @@ def preprocessing_cv(data_dev_mode, tag):
         # kfold[i]["X_train"]= pd.concat([kfold[i]["X_train"], train_new_features], axis=1)
         # kfold[i]["X_dev"]= pd.concat([kfold[i]["X_dev"], test_new_features], axis=1)
 
-#        logger.info(f'PREPROCESSING, Fold {i}, Oversampling...')
+        # logger.info(f'PREPROCESSING, Fold {i}, Oversampling...')
         temp_train_set = kfold[i]["X_train"]
         temp_y = kfold[i]["y_train"]
-        over_sampling = blocks.over_sample_block(tag)
-#        kfold[i]["X_train"], kfold[i]["y_train"] = over_sampling.transformer.fit_transform(kfold[i]["X_train"], kfold[i]["y_train"])
+        over_sampling = blocks.over_sample_block(config.SOLUTION_CONFIG, tag)
+        # kfold[i]["X_train"], kfold[i]["y_train"] = over_sampling.transformer.fit_transform(kfold[i]["X_train"], kfold[i]["y_train"])
 
         logger.info(f'PREPROCESSING, KMeanFeaturizer...')
         kmeans = blocks.kmeans_block(config.SOLUTION_CONFIG, tag)
         train_cluster = kmeans.transformer.fit_transform(kfold[i]["X_train"], kfold[i]["y_train"])
         dev_cluster = kmeans.transformer.transform(kfold[i]["X_dev"])
         kfold[i]["X_train"] = pd.concat([kfold[i]["X_train"], pd.DataFrame(train_cluster)], axis=1, ignore_index=True)
-#        kfold[i]["X_train"]['cluster'] = train_cluster
+        # kfold[i]["X_train"]['cluster'] = train_cluster
         kfold[i]["X_dev"] = pd.concat([kfold[i]["X_dev"], pd.DataFrame(dev_cluster)], axis=1, ignore_index=True)
-#        kfold[i]["X_dev"]['cluster'] = dev_cluster
+        # kfold[i]["X_dev"]['cluster'] = dev_cluster
 
         logger.info(f'PREPROCESSING, Fold {i}, Feature selection...')
         selection = blocks.selection_block(config.SOLUTION_CONFIG, tag)
@@ -183,6 +186,44 @@ def preprocessing_cv(data_dev_mode, tag):
         logger.info(f'DONE PREPROCESSING CV, Fold {i},...')
    
     logger.info('DONE PREPROCESSING CV...')
+
+def woe_multiple_algos_test(data_dev_mode, tag):
+    logger.info('TESTING ALGORITHMS...')
+    data = _read_data(data_dev_mode, config.params.train_woe_filepath, config.params.test_woe_filepath)
+    label = data['train']['label']
+    data['train'] = data['train'].drop(columns=['label'])
+
+    kfold = _get_KFold(data['train'], label, 5, random_state=config.RANDOM_SEED)
+
+    for algo in ['LightGBM', 'CatBoost', 'XGBoost', 'RandomForest']:
+        _cross_validate_auc(algo, kfold, features=None)
+
+def _impute_sample(x, y):
+    """
+    Sampling y to impute for missing values in x
+
+    Parameters
+    ----------
+    x: 1d numpy array-like (n x 1)
+        The array with missing value
+    y: 1d numpy array-like (n x 1)
+        The array for sampling
+    
+    Return
+    ----------
+    x: 1d numpy array-like 
+        The imputed array
+    """
+
+    x_cp = np.copy(x)
+    y_count = np.bincount(y)
+    y_prob = y_count / y_count.sum()
+
+    miss = np.isnan(x_cp)
+    x_cp[miss] = np.random.choice(y, size=len(x_cp), p=y_prob)[miss]
+    
+    del y_count, y_prob, miss
+    return x_cp
 
 def train_cv(pipeline_name, data_dev_mode, tag):
     logger.info('TRAINING CV ...')
@@ -362,3 +403,25 @@ def _cross_validate_auc(model, kfold, features=None, **clf_params):
              title="Receiver operating characteristic example")
         ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
         plt.show()
+
+
+def _get_KFold(X, y, n_splits, random_state=None):
+  splits = []
+  kf = KFold(n_splits=n_splits, random_state=random_state, shuffle=True)
+  for train_index, dev_index in kf.split(X):
+    if isinstance(X, pd.DataFrame):
+      X_train, X_dev, y_train, y_dev = X.iloc[train_index], X.iloc[dev_index], y[train_index], y[dev_index]
+    elif isinstance(X, np.ndarray):
+      X_train, X_dev, y_train, y_dev = X[train_index], X[dev_index], y[train_index], y[dev_index]
+    splits.append({
+        "X_train": X_train,
+        "X_dev": X_dev,
+        "y_train": y_train,
+        "y_dev": y_dev,
+    })
+    X_train.reset_index(inplace=True, drop=True)
+    y_train.reset_index(inplace=True, drop=True)
+    X_dev.reset_index(inplace=True, drop=True)
+    y_dev.reset_index(inplace=True, drop=True)
+
+  return splits
