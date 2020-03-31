@@ -353,6 +353,10 @@ class FeatureSelection(BaseEstimator, ClassifierMixin):
     self.covariateshift_ = CovariateShift()
     self.covariateshift_.fit(X, X_test)
 
+#    logger.info('FeatureSelection, Correlation')
+#    self.corr_ = DropCorrelation()
+#    self.corr_.fit(X)
+
     logger.info('FeatureSelection, done fit')
     return self
   
@@ -361,9 +365,10 @@ class FeatureSelection(BaseEstimator, ClassifierMixin):
 
     rfecv_feas = set(X.columns[self.rfecv_.support_])
     covashift_feas = set(self.covariateshift_.transform(X))   
-    
+#    corr_feas = set(self.corr_.transform(X))
+
     logger.info('FeatureSelection, done transform')
-    return list(rfecv_feas.union(covashift_feas))
+    return list(rfecv_feas.intersection(covashift_feas))
 
 class CovariateShift(BaseEstimator, ClassifierMixin):
   
@@ -404,6 +409,20 @@ class CovariateShift(BaseEstimator, ClassifierMixin):
     logger.info('CovariateShift, done transform')
     return feature_imp['Feature'][:cols_selected]
 
+class DropCorrelation(BaseEstimator, ClassifierMixin):
+    
+    def fit(self, X, *args, **kwargs):
+        return self
+
+    def transform(self, X, *args, **kawrgs):
+        corr_matrix = X.corr().abs()
+        upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
+        to_selected = [col for col in corr_matrix.columns if any(upper[col] < 0.95)]
+        
+        return to_selected
+
+    def fit_transform(self, X, *args, **kwargs):
+        return self.fit(X).transform(X)
 
 class SMOte(BaseEstimator, ClassifierMixin):
   def __init__(self, **params):
