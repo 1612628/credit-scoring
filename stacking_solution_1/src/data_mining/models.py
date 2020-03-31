@@ -47,7 +47,7 @@ class SklearnClassifier(BaseEstimator, ClassifierMixin):
 
   def transform(self, X, *args, **kwargs):
     logger.info(f'Fit.')
-    pred = self.estimator_.predict_proba(X)[:, 1].reshape(-1, 1)
+    pred = self.estimator_.predict_proba(X)[:, 1].reshape(-1)
     logger.info(f'Done fit.')
     return pred
   
@@ -203,7 +203,7 @@ class XGBoost(BaseEstimator, ClassifierMixin):
     logger.info('XGBoost, transform.')
     logger.info(f'XGBoost, transform, testing shape: {X.shape}')
     X_DMatrix = xgb.DMatrix(X)
-    pred = self.estimator_.predict(X_DMatrix).reshape(-1, 1)
+    pred = self.estimator_.predict(X_DMatrix).reshape(-1)
     logger.info(f'XGBoost, transform, predictions shape: {pred.shape}')
     logger.info('XGBoost, done transform.')
     return pred
@@ -240,7 +240,7 @@ class CatBoost(BaseEstimator, ClassifierMixin):
   def transform(self, X, *args, **kwargs):
     logger.info(f'CatBoost, transform') 
     logger.info(f'CatBoost, transform, testing shape: {X.shape}')
-    pred = self.estimator_.predict_proba(X)[:,1].reshape(-1, 1)
+    pred = self.estimator_.predict_proba(X)[:,1].reshape(-1)
     logger.info(f'CatBoost, transform, predictions shape: {pred.shape}')
     logger.info(f'CatBoost, done transform') 
     return pred
@@ -325,7 +325,7 @@ class NeuralNetwork(BaseEstimator, ClassifierMixin):
     logger.info(f'Neural network, transform') 
     logger.info(f'Neural network, transform, testing shape: {X.shape}')
     pred = self.model.predict(X, verbose=1)
-    pred = np.array([x[0] for x in pred]).reshape(-1, 1)
+    pred = np.array([x[0] for x in pred]).reshape(-1)
     logger.info(f'Neural network, transform, predictions shape: {pred.shape}')
     logger.info(f'Neural network, done transform') 
     return pred
