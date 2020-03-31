@@ -47,7 +47,7 @@ class PipelineManager:
     def tuning(self, pipeline_name, tag, train_filepath=config.params.train_preprocessed_filepath, test_filepath=config.params.test_preprocessed_filepath):
         hyperparameter_tunning(pipeline_name, False, tag, train_filepath, test_filepath)
     
-    def woe_algos_test(data_dev_mode, tag):
+    def woe_algos_test(self, data_dev_mode, tag):
         woe_multiple_algos_test(False, tag)
 
 def preprocessing(data_dev_mode, tag, train_filepath, test_filepath, train_preprocessed_filepath, test_preprocessed_filepath):
