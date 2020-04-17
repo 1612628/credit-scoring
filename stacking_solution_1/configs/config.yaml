@@ -39,6 +39,12 @@ parameters:
     - './cv_input/X_dev_3.csv'
     - './cv_input/X_dev_4.csv'
     - './cv_input/X_dev_5.csv'
+  cv_y_dev_filepaths:
+    - './cv_input/y_dev_1.csv'
+    - './cv_input/y_dev_2.csv'
+    - './cv_input/y_dev_3.csv'
+    - './cv_input/y_dev_4.csv'
+    - './cv_input/y_dev_5.csv'
   cv_X_dev_preprocessed_filepaths:
     - './cv_input/X_dev_preprocessed_1.csv'
     - './cv_input/X_dev_preprocessed_2.csv'
@@ -90,7 +96,7 @@ parameters:
   lgbm__number_boosting_rounds: 1000
   lgbm__early_stopping_rounds: 50
   lgbm__learning_rate: 0.28
-  lgbm__max_bin: 1024
+  lgbm__max_bin: 512
   lgbm__max_depth: 12
   lgbm__num_leaves: 10
   lgbm__min_data_in_leaf: 100
@@ -98,10 +104,10 @@ parameters:
   lgbm__bagging_freq: 1
   lgbm__feature_fraction: 0.65
   lgbm__min_gain_to_split: 0.0
-  lgbm__lambda_l1: 500.0
-  lgbm__lambda_l2: 250.0
+  lgbm__lambda_l1: 2.0
+  lgbm__lambda_l2: 2.0
   lgbm__is_unbalanced: True 
-  lgbm__scale_pos_weight: 100.7
+  lgbm__scale_pos_weight: 1
 # Light GBM hyperparameters tuning
   tuning_lgbm__boosting_type: [goss]
   tuning_lgbm__objective: [binary]

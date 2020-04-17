@@ -408,7 +408,7 @@ class Blending(BaseEstimator, ClassifierMixin):
     return self
   
   def transform(self, X, *args, **kwargs):
-    return self.predict_proba(X, arg, kwargs)
+    return self.predict_proba(X, *arg, kwargs)
   
   def score(self, X, y, *args, **kwargs):
     return roc_auc_score(y, self.transform(X)) 
