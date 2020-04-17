@@ -19,40 +19,40 @@ parameters:
     - './cv_input/X_train_preprocessed_3.csv'
     - './cv_input/X_train_preprocessed_4.csv'
     - './cv_input/X_train_preprocessed_5.csv'
+  cv_X_train_preprocessed_final_filepaths:
+    - './cv_input/X_train_preprocessed_final_1.csv'
+    - './cv_input/X_train_preprocessed_final_2.csv'
+    - './cv_input/X_train_preprocessed_final_3.csv'
+    - './cv_input/X_train_preprocessed_final_4.csv'
+    - './cv_input/X_train_preprocessed_final_5.csv'
 
   cv_y_train_filepaths:
-    - './cv_input/y_train_multi_1.csv'
-    - './cv_input/y_train_multi_2.csv'
-    - './cv_input/y_train_multi_3.csv'
-    - './cv_input/y_train_multi_4.csv'
-    - './cv_input/y_train_multi_5.csv'
-  cv_y_train_preprocessed_filepaths:
-    - './cv_input/y_train_preprocessed_1.csv'
-    - './cv_input/y_train_preprocessed_2.csv'
-    - './cv_input/y_train_preprocessed_3.csv'
-    - './cv_input/y_train_preprocessed_4.csv'
-    - './cv_input/y_train_preprocessed_5.csv'
+    - './cv_input/y_train_1.csv'
+    - './cv_input/y_train_2.csv'
+    - './cv_input/y_train_3.csv'
+    - './cv_input/y_train_4.csv'
+    - './cv_input/y_train_5.csv'
 
   cv_X_dev_filepaths:
-    - './cv_input/X_dev_multi_1.csv'
-    - './cv_input/X_dev_multi_2.csv'
-    - './cv_input/X_dev_multi_3.csv'
-    - './cv_input/X_dev_multi_4.csv'
-    - './cv_input/X_dev_multi_5.csv'
+    - './cv_input/X_dev_1.csv'
+    - './cv_input/X_dev_2.csv'
+    - './cv_input/X_dev_3.csv'
+    - './cv_input/X_dev_4.csv'
+    - './cv_input/X_dev_5.csv'
   cv_X_dev_preprocessed_filepaths:
     - './cv_input/X_dev_preprocessed_1.csv'
     - './cv_input/X_dev_preprocessed_2.csv'
     - './cv_input/X_dev_preprocessed_3.csv'
     - './cv_input/X_dev_preprocessed_4.csv'
     - './cv_input/X_dev_preprocessed_5.csv'
+  cv_X_dev_preprocessed_final_filepaths:
+    - './cv_input/X_dev_preprocessed_final_1.csv'
+    - './cv_input/X_dev_preprocessed_final_2.csv'
+    - './cv_input/X_dev_preprocessed_final_3.csv'
+    - './cv_input/X_dev_preprocessed_final_4.csv'
+    - './cv_input/X_dev_preprocessed_final_5.csv'
 
-  cv_y_dev_filepaths:
-    - './cv_input/y_dev_multi_1.csv'
-    - './cv_input/y_dev_multi_2.csv'
-    - './cv_input/y_dev_multi_3.csv'
-    - './cv_input/y_dev_multi_4.csv'
-    - './cv_input/y_dev_multi_5.csv'
-
+  
   experiment_dir: './models/stacking_1/exp'
   params_dir: './models/params'
 # Data preparation
@@ -87,8 +87,8 @@ parameters:
   lgbm__boosting_type: goss
   lgbm__objective: binary
   lgbm__metric: auc
-  lgbm__number_boosting_rounds: 15
-  lgbm__early_stopping_rounds: 20
+  lgbm__number_boosting_rounds: 1000
+  lgbm__early_stopping_rounds: 50
   lgbm__learning_rate: 0.28
   lgbm__max_bin: 1024
   lgbm__max_depth: 12
@@ -125,7 +125,8 @@ parameters:
 # Catboost
   catboost__loss_function: Logloss
   catboost__eval_metric: AUC
-  catboost__iterations: 15
+  catboost__iterations: 1000
+  catboost__early_stopping_rounds: 50
   catboost__learning_rate: 0.3
   catboost__depth: 10
   catboost__l2_leaf_reg: 3.0
@@ -150,8 +151,8 @@ parameters:
   xgb__tree_method: exact # gpu_hist  # auto  hist
   xgb__objective: binary:logistic
   xgb__eval_metric: auc
-  xgb__num_boost_round: 300
-  xgb__early_stopping_rounds: 30
+  xgb__num_boost_round: 1000
+  xgb__early_stopping_rounds: 50
   xgb__eta: 0.15
   xgb__max_leaves: 10
   xgb__max_depth: 10 
@@ -162,6 +163,7 @@ parameters:
   xgb__lambda: 2
   xgb__alpha: 1
   xgb__scale_pos_weight: 60.7
+
 # XGBoost hyperparameter tunning
   tuning_xgb__booster: [gbtree] #dart
   tuning_xgb__tree_method: [exact] # hist 
@@ -242,3 +244,12 @@ parameters:
   tuning_lr__class_weight: [balanced]
   tuning_lr__solver: [liblinear, saga]
   tuning_lr__max_iter: [20, 50, 100]
+
+# Natural Gradient Boosting
+  ngboost__n_estimators: 100
+  ngboost__learning_rate: 0.1
+  ngboost__minibatch_frac: 0.68
+  
+
+# Blending model
+  blending__use_feature_in_secondary: False

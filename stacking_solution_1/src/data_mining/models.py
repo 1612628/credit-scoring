@@ -23,7 +23,8 @@ from sklearn.metrics import roc_auc_score
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import normalize
 
-
+from ngboost import NGBClassifier
+from sklearn.utils.multiclass import unique_labels
 from imblearn.over_sampling import SMOTE
 
 from ..common.utils import get_logger
@@ -333,6 +334,102 @@ class NeuralNetwork(BaseEstimator, ClassifierMixin):
   def predict_proba(self, X, *args, **kwargs):
     return self.transform(X, args, kwargs)
 
+
+class NGBoost(BaseEstimator, ClassifierMixin):
+  def __init__(self, **params):
+    logger.info('Initializing NGBoost...')
+    self.params_ = params
+    self.classes_ = np.array([0,1])
+
+  def get_params(self, deep=True):
+    return self.params_
+  
+  def fit(self, X, y, *args, **kwargs):
+    logger.info(f'NGBoost, fit') 
+    logger.info(f'NGBoost, training data shape {X.shape}')
+    logger.info(f'NGBoost, training label shape {y.shape}')
+    
+    X_np = X.to_numpy()
+    y_np = y.copy()
+    if type(y) == pd.Series:
+      y_np = y.astype("int64").to_numpy()
+
+    self.estimator_ = NGBClassifier(**self.params_)
+    self.estimator_.fit(X_np, y_np)
+    logger.info(f'NGBoost, done fit') 
+    return self
+  
+  def transform(self, X, *args, **kwargs):
+    logger.info(f'NGBoost, transform') 
+    logger.info(f'NGBoost, transform, testing shape: {X.shape}')
+    pred = self.estimator_.predict_proba(X.to_numpy())[:,1].reshape(-1)
+    logger.info(f'NGBoost, transform, predictions shape: {pred.shape}')
+    logger.info(f'NGBoost, done transform') 
+    return pred
+  
+  def score(self, X, y, *args, **kwargs):
+    return roc_auc_score(y, self.transform(X)) 
+  
+  def predict_proba(self, X, *args, **kwargs):
+    return self.transform(X, args, kwargs)
+  
+class Blending(BaseEstimator, ClassifierMixin):
+  def __init__(self, base_models, meta_model, use_feature_in_secondary=False):
+    logger.info('Initializing Blending...')
+    self.base_models_ = base_models
+    self.meta_model_ = meta_model
+    self.use_feature_in_secondary_ = use_feature_in_secondary
+    self.classes_ = np.array([0,1])
+
+  def get_params(self, deep=True):
+    return {
+      'base_models':self.base_models_,
+      'meta_model': self.meta_model_,
+      'use_feature_in_secondary': self.use_feature_in_secondary_,
+      }
+  
+  def fit(self, X, y=None, *args, **kwargs):
+    logger.info(f'Blending, fit') 
+    logger.info(f'Blending, training data shape {X.shape}')
+    logger.info(f'Blending, training label shape {y.shape}')
+    
+    hold_out_prediction = np.zeroes(X.shape[0], len(self.base_models_))
+    for i, base_model in enumerate(self.base_models_):
+      base_model.fit(X)
+      pred = base_model.predict_proba(X)
+      hold_out_prediction[:, i] = pred
+    hold_out_prediction = pd.DataFrame(hold_out_prediction)
+    if self.use_feature_in_secondary_:
+      X_meta = pd.concat([X, hold_out_prediction], axis=1)
+      self.meta_model_.fit(X_meta)
+    else:
+      self.meta_model_.fit(hold_out_prediction)
+      
+    return self
+  
+  def transform(self, X, *args, **kwargs):
+    return self.predict_proba(X, arg, kwargs)
+  
+  def score(self, X, y, *args, **kwargs):
+    return roc_auc_score(y, self.transform(X)) 
+  
+  def predict_proba(self, X, *args, **kwargs):
+    logger.info(f'Blending, predict_proba') 
+    logger.info(f'Blending, predict_proba, testing shape: {X.shape}')
+    meta_feas = np.column_stack([
+      model.predict_proba(X) for model in self.base_models_
+    ])
+    
+    meta_feas = pd.DataFrame(meta_feas)
+    if self.use_feature_in_secondary_:
+      X_meta = pd.concat([X, meta_feas], axis=1)
+      pred = self.meta_model_.predict_proba(X_meta).reshape(-1)
+    else:
+      pred = self.meta_model_.predict_proba(meta_feas).reshape(-1)
+    logger.info(f'Blending, predict_proba, predictions shape: {pred.shape}')
+    logger.info(f'Blending, done predict_proba') 
+    return pred
+
 class FeatureSelection(BaseEstimator, ClassifierMixin):
 
   def __init__(self):
@@ -403,7 +500,6 @@ class CovariateShift(BaseEstimator, ClassifierMixin):
 
     logger.info('CovariateShift, done transform')
     return feature_imp['Feature'][:cols_selected]
-
 
 class SMOte(BaseEstimator, ClassifierMixin):
   def __init__(self, **params):

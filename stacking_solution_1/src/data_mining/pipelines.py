@@ -55,6 +55,20 @@ def xgboost_pipeline(so_config, suffix=''):
 
     return xgboost_pipe
 
+def ngboost_pipeline(so_config, suffix=''):
+    scale = blocks.scale_block(suffix)
+
+    ngboost =  blocks.ngboost_block(so_config, suffix)
+    memory = Memory(location=so_config.pipeline.experiment_dir, verbose=10)
+    ngboost_pipe = Pipeline([
+        (scale.name, scale.transformer),
+        (ngboost.name, ngboost.transformer)
+    ],
+    memory=memory
+    )
+
+    return ngboost_pipe
+
 def neural_network_pipeline(so_config, suffix=''):
     scale = blocks.scale_block(suffix)
     
@@ -119,6 +133,21 @@ def stacking_solution_1(so_config, suffix=''):
     memory=memory)
     return ensemble_pipe
 
+def blending_pipeline(base_models, meta_model, so_config, suffix=''):
+    scale = blocks.scale_block(suffix)
+
+    blending =  blocks.blending(base_models, meta_model, so_config, suffix)
+    memory = Memory(location=so_config.pipeline.experiment_dir, verbose=10)
+    blending_pipe= Pipeline([
+        (scale.name, scale.transformer),
+        (blending.name, blending.transformer)
+    ],
+    memory=memory
+    )
+
+    return blending_pipe
+
+
 PIPELINES = {
     'LightGBM':lightgbm_pipeline,
     'CatBoost':catboost_pipeline,
@@ -126,5 +155,7 @@ PIPELINES = {
     'NeuralNetwork':neural_network_pipeline,
     'RandomForest': partial(sklearn_pipeline, ClassifierClass=RandomForestClassifier, clf_name='random_forest'),
     'LogisticRegression': partial(sklearn_pipeline, ClassifierClass=LogisticRegression, clf_name='log_reg'),
-    'StackingSolution1': stacking_solution_1
+    'StackingSolution1': stacking_solution_1,
+    'NGBoost': ngboost_pipeline,
+    'Blending': blending_pipeline
 }

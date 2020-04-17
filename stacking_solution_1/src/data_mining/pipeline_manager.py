@@ -14,6 +14,9 @@ from scipy.stats import gmean
 from sklearn.metrics import roc_auc_score, auc, plot_roc_curve
 from sklearn.model_selection import train_test_split, GridSearchCV, KFold
 
+from mlxtend.feature_selection import SequentialFeatureSelector
+from mlxtend.plotting import  plot_sequential_feature_selection
+
 import joblib
 
 import gc
@@ -29,11 +32,27 @@ set_seed(config.RANDOM_SEED)
 logger = init_logger()
 
 class PipelineManager:
-    def preprocessing(self, tag, train_filepath=config.params.train_filepath, test_filepath=config.params.test_filepath, train_preprocessed_filepath=config.params.train_preprocessed_filepath, test_preprocessed_filepath=config.params.test_preprocessed_filepath):
-        preprocessing(False, tag, train_filepath, test_filepath, train_preprocessed_filepath, test_preprocessed_filepath)
+    def preprocessing(self, tag,
+                      train_filepath=config.params.train_filepath,
+                      test_filepath=config.params.test_filepath,
+                      train_preprocessed_filepath=config.params.train_preprocessed_filepath,
+                      test_preprocessed_filepath=config.params.test_preprocessed_filepath):
+        preprocessing(False, tag,
+                      train_filepath,
+                      test_filepath,
+                      train_preprocessed_filepath,
+                      test_preprocessed_filepath)
 
-    def preprocessing_cv(self, data_dev_mode, tag):
-        preprocessing_cv(data_dev_mode, tag)
+    def preprocessing_cv(self, data_dev_mode, tag, 
+                        X_train_filepaths=config.params.cv_X_train_preprocessed_filepaths,
+                        y_train_filepaths=config.params.cv_y_train_filepaths,
+                        X_dev_filepaths=config.params.cv_X_dev_preprocessed_filepaths,
+                        y_dev_filepaths=config.params.cv_y_dev_filepaths):
+        preprocessing_cv(data_dev_mode, tag,
+                         X_train_filepaths,
+                         y_train_filepaths,
+                         X_dev_filepaths,
+                         y_dev_filepaths)
 
     def train(self, pipeline_name, data_dev_mode, tag, train_filepath=config.params.train_preprocessed_filepath, test_filepath=config.params.test_preprocessed_filepath):
         self.pipe = train(pipeline_name, data_dev_mode, tag, train_filepath, test_filepath)
@@ -47,8 +66,8 @@ class PipelineManager:
     def tuning(self, pipeline_name, tag, train_filepath=config.params.train_preprocessed_filepath, test_filepath=config.params.test_preprocessed_filepath):
         hyperparameter_tunning(pipeline_name, False, tag, train_filepath, test_filepath)
     
-    def woe_algos_test(self, data_dev_mode, tag):
-        woe_multiple_algos_test(False, tag)
+    def algos_test(self, data_dev_mode, tag):
+        multiple_algos_test(False, tag)
 
 def preprocessing(data_dev_mode, tag, train_filepath, test_filepath, train_preprocessed_filepath, test_preprocessed_filepath):
     logger.info('PREPROCESSING...')
@@ -98,7 +117,6 @@ def preprocessing(data_dev_mode, tag, train_filepath, test_filepath, train_prepr
     logger.info('DONE PREPROCESSING...')
     return train_set, test_set
 
-
 def train(pipeline_name, data_dev_mode, tag, train_filepath, test_filepath):
     logger.info('TRAINING...')
     
@@ -123,17 +141,17 @@ def train(pipeline_name, data_dev_mode, tag, train_filepath, test_filepath):
     gc.collect()
     return pipeline 
 
-def preprocessing_cv(data_dev_mode, tag):
+def preprocessing_cv(data_dev_mode, tag, cv_X_train_filepaths, cv_y_train_filepaths, cv_X_dev_filepaths, cv_y_dev_filepaths):
     logger.info('PREPROCESSING CV...')
     
     if bool(config.params.clean_experiment_directory_before_training) and os.path.isdir(config.params.experiment_dir):
         logger.info('Cleaning experiment directory...')
         shutil.rmtree(config.params.experiment_dir)
     kfold = _read_kfold_data(data_dev_mode,
-                                config.params.cv_X_train_filepaths,
-                            config.params.cv_y_train_filepaths,
-                            config.params.cv_X_dev_filepaths,
-                            config.params.cv_y_dev_filepaths)
+                                cv_X_train_filepaths,
+                                cv_y_train_filepaths,
+                                cv_X_dev_filepaths,
+                                cv_y_dev_filepaths)
     
     for i in range(0, len(kfold)):
         logger.info(f'PREPROCESSING CV, Fold {i}, Train shape: {kfold[i]["X_train"].shape}')
@@ -154,13 +172,13 @@ def preprocessing_cv(data_dev_mode, tag):
         over_sampling = blocks.over_sample_block(config.SOLUTION_CONFIG, tag)
         # kfold[i]["X_train"], kfold[i]["y_train"] = over_sampling.transformer.fit_transform(kfold[i]["X_train"], kfold[i]["y_train"])
 
-        logger.info(f'PREPROCESSING, KMeanFeaturizer...')
+        # logger.info(f'PREPROCESSING, KMeanFeaturizer...')
         kmeans = blocks.kmeans_block(config.SOLUTION_CONFIG, tag)
         train_cluster = kmeans.transformer.fit_transform(kfold[i]["X_train"], kfold[i]["y_train"])
         dev_cluster = kmeans.transformer.transform(kfold[i]["X_dev"])
-        kfold[i]["X_train"] = pd.concat([kfold[i]["X_train"], pd.DataFrame(train_cluster)], axis=1, ignore_index=True)
+        # kfold[i]["X_train"] = pd.concat([kfold[i]["X_train"], pd.DataFrame(train_cluster)], axis=1, ignore_index=True)
         # kfold[i]["X_train"]['cluster'] = train_cluster
-        kfold[i]["X_dev"] = pd.concat([kfold[i]["X_dev"], pd.DataFrame(dev_cluster)], axis=1, ignore_index=True)
+        # kfold[i]["X_dev"] = pd.concat([kfold[i]["X_dev"], pd.DataFrame(dev_cluster)], axis=1, ignore_index=True)
         # kfold[i]["X_dev"]['cluster'] = dev_cluster
 
         logger.info(f'PREPROCESSING, Fold {i}, Feature selection...')
@@ -175,10 +193,8 @@ def preprocessing_cv(data_dev_mode, tag):
         gc.collect()
 
         logger.info('')
-        kfold[i]["X_train"].to_csv(config.params.cv_X_train_preprocessed_filepaths[i], index=False)
-        kfold[i]["y_train"] = pd.Series(kfold[i]["y_train"])
-        kfold[i]["y_train"].to_csv(config.params.cv_y_train_preprocessed_filepaths[i], index=False, header=False)
-        kfold[i]["X_dev"].to_csv(config.params.cv_X_dev_preprocessed_filepaths[i], index=False)
+        kfold[i]["X_train"].to_csv(config.params.cv_X_train_preprocessed_final_filepaths[i], index=False)
+        kfold[i]["X_dev"].to_csv(config.params.cv_X_dev_preprocessed_final_filepaths[i], index=False)
 
         logger.info(f'PREPROCESSING CV, Fold {i}, Train set is dumped into path: {config.params.cv_X_train_preprocessed_filepaths[i]}')
         logger.info(f'PREPROCESSING CV, Fold {i}, y train set is dumped into path: {config.params.cv_y_train_preprocessed_filepaths[i]}')
@@ -187,43 +203,54 @@ def preprocessing_cv(data_dev_mode, tag):
    
     logger.info('DONE PREPROCESSING CV...')
 
-def woe_multiple_algos_test(data_dev_mode, tag):
+def FeatureSelection(pipeline_name, data_dev_mode, tag, train_filepath, test_filepath):
+    logger.info('FEATURE SELECTION...')
+    
+    if bool(config.params.clean_experiment_directory_before_training) and os.path.isdir(config.params.experiment_dir):
+        logger.info('Cleaning experiment directory...')
+        shutil.rmtree(config.params.experiment_dir)
+    
+    data = _read_data(data_dev_mode, train_filepath, test_filepath) 
+
+    train_set = data['train']
+    
+    y = train_set[config.TARGET_COL].values.reshape(-1,)
+    train_set = train_set.drop(columns=config.TARGET_COL)
+    
+    pipeline = PIPELINES[pipeline_name](so_config = config.SOLUTION_CONFIG, suffix=tag)
+
+    sfs = SequentialFeatureSelector(estimator=pipeline, k_features=(10, len(train_set.columns)), forward=False, verbose=2, cv=5, scoring='roc_auc')
+    sfs.fit(train_set.to_numpy(), y)
+    
+    fig = plot_sequential_feature_selection(sfs.get_metric_dict())
+    plt.ylim([0.6, 1])
+    plt.title('Sequential Feature Selection')
+    plt.grid()
+    plt.show()
+
+def multiple_algos_test(data_dev_mode, tag):
     logger.info('TESTING ALGORITHMS...')
-    data = _read_data(data_dev_mode, config.params.train_woe_filepath, config.params.test_woe_filepath)
-    label = data['train']['label']
-    data['train'] = data['train'].drop(columns=['label'])
-
-    kfold = _get_KFold(data['train'], label, 5, random_state=config.RANDOM_SEED)
-
-    for algo in ['LightGBM', 'CatBoost', 'XGBoost', 'RandomForest']:
-        _cross_validate_auc(algo, kfold, features=None)
-
-def _impute_sample(x, y):
-    """
-    Sampling y to impute for missing values in x
-
-    Parameters
-    ----------
-    x: 1d numpy array-like (n x 1)
-        The array with missing value
-    y: 1d numpy array-like (n x 1)
-        The array for sampling
     
-    Return
-    ----------
-    x: 1d numpy array-like 
-        The imputed array
-    """
+    kfold = _read_kfold_data(data_dev_mode, 
+                            config.params.cv_X_train_preprocessed_filepaths,
+                            config.params.cv_y_train_filepaths,
+                            config.params.cv_X_dev_preprocessed_filepaths,
+                            config.params.cv_y_dev_filepaths)
 
-    x_cp = np.copy(x)
-    y_count = np.bincount(y)
-    y_prob = y_count / y_count.sum()
-
-    miss = np.isnan(x_cp)
-    x_cp[miss] = np.random.choice(y, size=len(x_cp), p=y_prob)[miss]
+    logger.info('TESTING SINGLE MODELS...')
+    for algo in ['LightGBM', 'CatBoost', 'XGBoost', 'RandomForest', 'NGBoost']:
+        pipeline = PIPELINES[algo](so_config = config.SOLUTION_CONFIG, suffix=tag)
+        _cross_validate_auc(pipeline, kfold, features=None)
     
-    del y_count, y_prob, miss
-    return x_cp
+    logger.info('TESTING BLENDING MODES...')
+    base_models=[
+        PIPELINES[algo](so_config = config.SOLUTION_CONFIG, suffix=tag) for algo in ['LightGBM', 'CatBoost', 'XGBoost', 'RandomForest', 'NGBoost']
+    ]
+    meta_model = blocks.LogisticRegression()
+    
+    blending = PIPELINES['Blending'](base_models=base_models, meta_model=meta_model, so_config = config.SOLUTION_CONFIG, suffix=tag)
+    _cross_validate_auc(blending, kfold, features=None)
+
 
 def train_cv(pipeline_name, data_dev_mode, tag):
     logger.info('TRAINING CV ...')
@@ -237,7 +264,7 @@ def train_cv(pipeline_name, data_dev_mode, tag):
     kfold = _read_kfold_data(data_dev_mode,
                             config.params.cv_X_train_preprocessed_filepaths,
                             config.params.cv_y_train_preprocessed_filepaths,
-                            config.params.cv_X_dev_preprocessed_filepaths,
+                            config.params.cv_X_dev_filepaths,
                             config.params.cv_y_dev_filepaths)
 
     _cross_validate_auc(pipeline, kfold, features=None)
@@ -332,9 +359,9 @@ def _read_kfold_data(data_dev_mode, cv_X_train_filepaths, cv_y_train_filepaths, 
 
     for i in range(0,len(cv_X_train_filepaths)):
         X_train = pd.read_csv(cv_X_train_filepaths[i], nrows=nrows)
-        y_train = pd.read_csv(cv_y_train_filepaths[i], nrows=nrows, header=None).values.reshape(-1,)
+        y_train = pd.read_csv(cv_y_train_filepaths[i], nrows=nrows).values.reshape(-1,)
         X_dev = pd.read_csv(cv_X_dev_filepaths[i], nrows=nrows)
-        y_dev = pd.read_csv(cv_y_dev_filepaths[i], nrows=nrows, header=None).values.reshape(-1,)
+        y_dev = pd.read_csv(cv_y_dev_filepaths[i], nrows=nrows).values.reshape(-1,)
         kfold.append({
             "X_train":X_train,
             "y_train":y_train,

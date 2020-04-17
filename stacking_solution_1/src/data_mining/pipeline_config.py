@@ -66,6 +66,7 @@ SOLUTION_CONFIG = AttrDict({
         'loss_function': param_eval(params.catboost__loss_function),
         'eval_metric': param_eval(params.catboost__eval_metric),
         'iterations': param_eval(params.catboost__iterations),
+        'early_stopping_rounds': param_eval(params.catboost__early_stopping_rounds),
         'learning_rate': param_eval(params.catboost__learning_rate),
         'depth': param_eval(params.catboost__depth),
         'l2_leaf_reg': param_eval(params.catboost__l2_leaf_reg),
@@ -148,6 +149,15 @@ SOLUTION_CONFIG = AttrDict({
             'batch_size': param_eval(params.nn__batch_size)
         },
         'callbacks_config': {},
+    },
+    
+    'blending':{
+        'use_feature_in_secondary':param_eval(params.blending__use_feature_in_secondary)
+    },
+    'ngboost':{
+        'n_estimators': param_eval(params.ngboost__n_estimators),
+        'learning_rate': param_eval(params.ngboost__learning_rate),
+        'minibatch_frac': param_eval(params.ngboost__minibatch_frac)
     },
 
     'tuner': {
