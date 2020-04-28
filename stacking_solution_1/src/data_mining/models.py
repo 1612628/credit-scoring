@@ -42,18 +42,27 @@ class SklearnClassifier(BaseEstimator, ClassifierMixin):
     self.classes_ = np.array([0,1])
 
   def fit(self, X, y, *args, **kwargs):
+    logger.info(f'Sklearn Classifier, fit.')
+    logger.info(f'Sklearn Classifier, Training data shape: {X.shape}')
+    logger.info(f'Sklearn Classifier, Training label shape: {y.shape}')
     self.estimator_ = self.classifier_(**self.params_) 
     self.estimator_.fit(X, y)
+    logger.info(f'Sklearn Classifier, fit done.')
     return self
 
   def transform(self, X, *args, **kwargs):
-    logger.info(f'Fit.')
+    logger.info(f'Sklearn Classifier, transform.')
+    logger.info(f'Sklearn Classifier, Training data shape: {X.shape}')
     pred = self.estimator_.predict_proba(X)[:, 1].reshape(-1)
-    logger.info(f'Done fit.')
+    logger.info(f'Sklearn Classifier, transform done.')
     return pred
   
   def predict_proba(self, X, *args, **kwargs):
-    return self.transform(X, args, kwargs)
+    logger.info(f'Sklearn Classifier, predict_proba')
+    logger.info(f'Sklearn Classifier, Training data shape: {X.shape}')
+    pred = self.estimator_.predict_proba(X)
+    logger.info(f'Sklearn Classifier, predict_proba, done.')
+    return pred    
   
   def get_params(self, deep=True):
     total_params = {'classifier': self.classifier_}
@@ -69,28 +78,16 @@ class LightGBM(BaseEstimator, ClassifierMixin):
     super().__init__()
     logger.info('initializing LightGBM ...')
     self.params_ = params
-    self.training_params_ = ['number_boosting_rounds','early_stopping_rounds']
+    # self.training_params_ = ['number_boosting_rounds','early_stopping_rounds']
     self.evaluation_function_ = None
     self.classes_ = np.array([0,1])
   
   def get_params(self, deep=True):
     return self.params_
   
-  @property
-  def model_config(self):
-    return AttrDict({
-        param: value for param, value in self.params_.items() if param not in self.training_params_
-    })
-  
-  @property
-  def training_config(self):
-    return AttrDict({
-        param: value for param, value in self.params_.items() if param in self.training_params_
-    })
-  
   def fit(self, X, y, *args, **kwargs):
     logger.info('LightGBM, fit.')
-    evaluation_results = {}
+    # evaluation_results = {}
     
     self._check_target_shape_and_type(y, 'y')
 
@@ -98,27 +95,22 @@ class LightGBM(BaseEstimator, ClassifierMixin):
 
     logger.info(f'LightGBM, Training data shape: {X.shape}')
     logger.info(f'LightGBM, Training label shape: {y.shape}')
-    
-    data_train = lgb.Dataset(data=X, 
-                             label=y,
-                             )
-    self.estimator_ = lgb.train(params=self.model_config, 
-                               train_set=data_train, 
-                               num_boost_round=self.training_config.number_boosting_rounds,
-                               feval=self.evaluation_function_,
-                               valid_sets=[data_train],
-                               valid_names=['train'],
-                               early_stopping_rounds=self.training_config.early_stopping_rounds,
-                               evals_result=evaluation_results,
-                               verbose_eval=self.model_config.verbose,
-                               )
+    self.estimator_ = lgb.LGBMClassifier(
+      **self.params_['init']
+    )
+    self.estimator_.fit(
+      X, y,
+      **self.params_['fit'],
+      eval_set=[(X,y)],
+      eval_names=['train'],
+    )
     logger.info('LightGBM, done fit.') 
     return self
   
   def transform(self, X, *args, **kwargs):
     logger.info('LightGBM, transform.')
     logger.info(f'LightGBM, transform, testing shape: {X.shape}')
-    pred = self.estimator_.predict(X).reshape(-1)
+    pred = self.estimator_.predict_proba(X)[:, 1].reshape(-1)
     logger.info(f'LightGBM, transform, predictions shape: {pred.shape}')
     logger.info('LightGBM, done transform.')
     return pred
@@ -127,7 +119,11 @@ class LightGBM(BaseEstimator, ClassifierMixin):
     return roc_auc_score(y, self.transform(X)) 
 
   def predict_proba(self, X, *args, **kwargs):
-    return self.transform(X, args, kwargs)
+    logger.info('LightGBM, predict_proba.')
+    logger.info(f'LightGBM, predict_proba, testing shape: {X.shape}')
+    pred = self.estimator_.predict_proba(X)
+    logger.info('LightGBM, predict_proba, done.')
+    return pred
 
   def _check_target_shape_and_type(self, target, name):
     if not any([isinstance(target, obj_type) for obj_type in [pd.Series, np.ndarray, list]]):
@@ -158,53 +154,40 @@ class XGBoost(BaseEstimator, ClassifierMixin):
   def __init__(self, **params):
     logger.info('initializing XGBoost ...')
     self.params_ = params
-    self.training_params_ = ['num_boost_round', 'early_stopping_rounds']
+    # self.training_params_ = ['num_boost_round', 'early_stopping_rounds']
     self.evaluation_function_ = None
     self.classes_ = np.array([0,1])
   
   def get_params(self, deep=True):
     return self.params_
   
-  @property
-  def model_config(self):
-
-    return AttrDict({
-        param: value for param, value in self.params_.items() if param not in self.training_params_
-    })
-
-  @property
-  def training_config(self):
-
-    return AttrDict({
-        param: value for param, value in self.params_.items() if param in self.training_params_
-    })
-
+  
   def fit(self, X, y, *args, **kwargs):
     logger.info('XGBoost, fit.')
     logger.info(f'XGBoost, Training data shape: {X.shape}')
     logger.info(f'XGBoost, Training label shape: {y.shape}')
 
-    train = xgb.DMatrix(X, 
-                        label=y)
+    # train = xgb.DMatrix(X, 
+    #                     label=y)
 
-    evaluation_results = {}
+    # evaluation_results = {}
+    self.estimator_ = xgb.XGBClassifier(
+      **self.params_['init']
+    )
+    self.estimator_.fit(
+      X, y,
+      **self.params_['fit'],
+      eval_set=[(X,y)],
+      
+    )
 
-    self.estimator_ = xgb.train(params=self.model_config, 
-                               dtrain=train, 
-                               evals=[(train, 'train')], 
-                               evals_result=evaluation_results,
-                               num_boost_round=self.training_config.num_boost_round,
-                               early_stopping_rounds=self.training_config.early_stopping_rounds, 
-                               verbose_eval=self.model_config.verbose,
-                               feval=self.evaluation_function_)
     logger.info('XGBoost, done fit.')
     return self
   
   def transform(self, X, *args, **kwargs):
     logger.info('XGBoost, transform.')
     logger.info(f'XGBoost, transform, testing shape: {X.shape}')
-    X_DMatrix = xgb.DMatrix(X)
-    pred = self.estimator_.predict(X_DMatrix).reshape(-1)
+    pred = self.estimator_.predict_proba(X)[:,1].reshape(-1)
     logger.info(f'XGBoost, transform, predictions shape: {pred.shape}')
     logger.info('XGBoost, done transform.')
     return pred
@@ -213,7 +196,11 @@ class XGBoost(BaseEstimator, ClassifierMixin):
     return roc_auc_score(y, self.transform(X)) 
 
   def predict_proba(self, X, *args, **kwargs):
-    return self.transform(X, args, kwargs)
+    logger.info('XGBoost, predict_proba.')
+    logger.info(f'XGBoost, predict_proba, testing shape: {X.shape}')
+    pred = self.estimator_.predict_proba(X)
+    logger.info('XGBoost, predict_proba, done.')
+    return pred
 
 
 class CatBoost(BaseEstimator, ClassifierMixin):
@@ -250,8 +237,11 @@ class CatBoost(BaseEstimator, ClassifierMixin):
     return roc_auc_score(y, self.transform(X)) 
 
   def predict_proba(self, X, *args, **kwargs):
-    return self.transform(X, args, kwargs)
-
+    logger.info(f'CatBoost, predict_proba') 
+    logger.info(f'CatBoost, predict_proba, testing shape: {X.shape}')
+    pred = self.estimator_.predict_proba(X)
+    logger.info(f'CatBoost, predict_proba, done')
+    return pred 
   
 class NeuralNetwork(BaseEstimator, ClassifierMixin):
   
@@ -332,7 +322,12 @@ class NeuralNetwork(BaseEstimator, ClassifierMixin):
     return pred
   
   def predict_proba(self, X, *args, **kwargs):
-    return self.transform(X, args, kwargs)
+    logger.info(f'Neural network, predict_proba') 
+    logger.info(f'Neural network, predict_proba, testing shape: {X.shape}')
+    pred = self.model.predict(X, verbose=1)
+    pred = np.hstack(np.zeros(pred.shape[0]).reshape(-1), pred).reshape(-1, 2)
+    logger.info(f'Neural network, predict_proba, done') 
+    return pred
 
 
 class NGBoost(BaseEstimator, ClassifierMixin):
@@ -344,16 +339,26 @@ class NGBoost(BaseEstimator, ClassifierMixin):
   def get_params(self, deep=True):
     return self.params_
   
+  def _to_numpy(self, X):
+    if isinstance(X, pd.DataFrame) or isinstance(X, pd.Series):
+      try:
+        return X.to_numpy()
+      except:
+        ValueError('There is error when converting to numpy')
+    elif isinstance(X, np.ndarray):      
+      return X
+    else:
+      ValueError('X must be pandas DataFrame, Series or numpy ndarray')
+  
   def fit(self, X, y, *args, **kwargs):
     logger.info(f'NGBoost, fit') 
     logger.info(f'NGBoost, training data shape {X.shape}')
     logger.info(f'NGBoost, training label shape {y.shape}')
     
-    X_np = X.to_numpy()
-    y_np = y.copy()
-    if type(y) == pd.Series:
-      y_np = y.astype("int64").to_numpy()
-
+    X_np = self._to_numpy(X)
+    y_np = self._to_numpy(y)
+    y_np = y_np.astype(int)
+    print(f'np.unique(y_np)')
     self.estimator_ = NGBClassifier(**self.params_)
     self.estimator_.fit(X_np, y_np)
     logger.info(f'NGBoost, done fit') 
@@ -362,7 +367,8 @@ class NGBoost(BaseEstimator, ClassifierMixin):
   def transform(self, X, *args, **kwargs):
     logger.info(f'NGBoost, transform') 
     logger.info(f'NGBoost, transform, testing shape: {X.shape}')
-    pred = self.estimator_.predict_proba(X.to_numpy())[:,1].reshape(-1)
+    X_np = self._to_numpy(X)
+    pred = self.estimator_.predict_proba(X_np)[:,1].reshape(-1)
     logger.info(f'NGBoost, transform, predictions shape: {pred.shape}')
     logger.info(f'NGBoost, done transform') 
     return pred
@@ -371,8 +377,13 @@ class NGBoost(BaseEstimator, ClassifierMixin):
     return roc_auc_score(y, self.transform(X)) 
   
   def predict_proba(self, X, *args, **kwargs):
-    return self.transform(X, args, kwargs)
-  
+    logger.info(f'NGBoost, predict_proba') 
+    logger.info(f'NGBoost, predict_proba, testing shape: {X.shape}')
+    X_np = self._to_numpy(X)
+    pred = self.estimator_.predict_proba(X_np)
+    logger.info(f'NGBoost, predict_proba, done') 
+    return pred
+
 class Blending(BaseEstimator, ClassifierMixin):
   def __init__(self, base_models, meta_model, use_feature_in_secondary=False):
     logger.info('Initializing Blending...')
@@ -388,27 +399,27 @@ class Blending(BaseEstimator, ClassifierMixin):
       'use_feature_in_secondary': self.use_feature_in_secondary_,
       }
   
-  def fit(self, X, y=None, *args, **kwargs):
+  def fit(self, X, y, *args, **kwargs):
     logger.info(f'Blending, fit') 
     logger.info(f'Blending, training data shape {X.shape}')
     logger.info(f'Blending, training label shape {y.shape}')
     
-    hold_out_prediction = np.zeroes(X.shape[0], len(self.base_models_))
+    hold_out_prediction = np.zeros((X.shape[0], len(self.base_models_)))
     for i, base_model in enumerate(self.base_models_):
-      base_model.fit(X)
+      base_model.fit(X, y)
       pred = base_model.predict_proba(X)
-      hold_out_prediction[:, i] = pred
+      hold_out_prediction[:, i] = pred[:, 1]
     hold_out_prediction = pd.DataFrame(hold_out_prediction)
-    if self.use_feature_in_secondary_:
+    if self.use_feature_in_secondary_ == True:
       X_meta = pd.concat([X, hold_out_prediction], axis=1)
-      self.meta_model_.fit(X_meta)
+      self.meta_model_.fit(X_meta, y)
     else:
-      self.meta_model_.fit(hold_out_prediction)
+      self.meta_model_.fit(hold_out_prediction, y)
       
     return self
   
   def transform(self, X, *args, **kwargs):
-    return self.predict_proba(X, *arg, kwargs)
+    return self.predict_proba(X, *args, kwargs)[:, 1].reshape(-1)
   
   def score(self, X, y, *args, **kwargs):
     return roc_auc_score(y, self.transform(X)) 
@@ -416,16 +427,17 @@ class Blending(BaseEstimator, ClassifierMixin):
   def predict_proba(self, X, *args, **kwargs):
     logger.info(f'Blending, predict_proba') 
     logger.info(f'Blending, predict_proba, testing shape: {X.shape}')
-    meta_feas = np.column_stack([
-      model.predict_proba(X) for model in self.base_models_
-    ])
-    
+    meta_feas = np.column_stack((
+      model.predict_proba(X)[:, 1].reshape(-1) for model in self.base_models_
+    ))
+    print(f'Blending, predict_proba, meta_feas shape: {meta_feas.shape}')
     meta_feas = pd.DataFrame(meta_feas)
-    if self.use_feature_in_secondary_:
+
+    if self.use_feature_in_secondary_ == True:
       X_meta = pd.concat([X, meta_feas], axis=1)
-      pred = self.meta_model_.predict_proba(X_meta).reshape(-1)
+      pred = self.meta_model_.predict_proba(X_meta)
     else:
-      pred = self.meta_model_.predict_proba(meta_feas).reshape(-1)
+      pred = self.meta_model_.predict_proba(meta_feas)
     logger.info(f'Blending, predict_proba, predictions shape: {pred.shape}')
     logger.info(f'Blending, done predict_proba') 
     return pred
@@ -450,9 +462,9 @@ class FeatureSelection(BaseEstimator, ClassifierMixin):
     self.covariateshift_ = CovariateShift()
     self.covariateshift_.fit(X, X_test)
 
-#    logger.info('FeatureSelection, Correlation')
-#    self.corr_ = DropCorrelation()
-#    self.corr_.fit(X)
+    # logger.info('FeatureSelection, Correlation')
+    # self.corr_ = DropCorrelation()
+    # self.corr_.fit(X)
 
     logger.info('FeatureSelection, done fit')
     return self
@@ -462,7 +474,7 @@ class FeatureSelection(BaseEstimator, ClassifierMixin):
 
     rfecv_feas = set(X.columns[self.rfecv_.support_])
     covashift_feas = set(self.covariateshift_.transform(X))   
-#    corr_feas = set(self.corr_.transform(X))
+    # corr_feas = set(self.corr_.transform(X))
 
     logger.info('FeatureSelection, done transform')
     return list(rfecv_feas.intersection(covashift_feas))

@@ -23,6 +23,9 @@ class KalapaFeatureExtraction:
     """
     def __init__(self):
         logger.info('KalapaFeatureExtraction...')
+        
+    def fit_transform(self, train, test):
+        return self.fit(train, test).transform(train, test)
     
     def fit(self, train, test, *args, **kwargs):
         logger.info('KalapaFeatureExtraction, fit')
@@ -34,24 +37,24 @@ class KalapaFeatureExtraction:
         dt_s = sc.var_filter(train, y='label')
         bins = sc.woebin(dt_s, y='label', bin_num_limit=20, positive="label|1", method='tree')
         train_woe = sc.woebin_ply(train.drop(columns=['label']), bins)
-        train_woe['label'] = train['label']
+        # train_woe['label'] = train['label']
         test_woe = sc.woebin_ply(test, bins)
 
-        temp = train_woe.sample(test_woe.shape[0]).drop(columns='label')
+        temp = train_woe.sample(test_woe.shape[0])
         test.reset_index(drop=True, inplace=True)
         temp.reset_index(drop=True, inplace=True)
         test_woe.fillna(temp, inplace=True)
         
-        encoding_params =  {'alpha':5, 'folds':3, 'target':train['label']}
-        train_mean, test_mean = mean_encoding(train[['FIELD_8', 'FIELD_9', 'FIELD_10', 'FIELD_13', 'FIELD_35', 'FIELD_41', 'FIELD_42', 'FIELD_44']],
-                             test[['FIELD_8', 'FIELD_9', 'FIELD_10', 'FIELD_13', 'FIELD_35', 'FIELD_41', 'FIELD_42', 'FIELD_44']], 
-                             **encoding_params)
-        train_t = pd.concat([train_woe, train_mean], axis=1)
-        test_t = pd.concat([test_woe, test_mean], axis=1)
+        # encoding_params =  {'alpha':5, 'folds':3, 'target':train['label']}
+        # train_mean, test_mean = mean_encoding(train[['8', '9', '10', '13', '35', '41', '42', '44']],
+        #                      test[['8', '9', '10', '13', '35', '41', '42', '44']], 
+        #                      **encoding_params)
+        train = pd.concat([train, train_woe], axis=1)
+        test = pd.concat([test, test_woe], axis=1)
         
-        del dt_s, bins, train_woe, test_woe, temp, train_mean, test_mean
+        del dt_s, bins, train_woe, test_woe, temp
         gc.collect()
-        return (train_t, test_t) 
+        return (train, test) 
 
 
         

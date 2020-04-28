@@ -7,7 +7,7 @@ from ..common.utils import read_params, param_eval
 params = read_params(fallback_file='./credit-scoring/stacking_solution_1/configs/config.yaml')
 
 RANDOM_SEED = 90310
-DEV_SAMPLE_SIZE = 500
+DEV_SAMPLE_SIZE = 100
 
 ID_COL = ['id']
 TARGET_COL = ['label']
@@ -40,33 +40,32 @@ SOLUTION_CONFIG = AttrDict({
         'experiment_dir': params.experiment_dir
     },
     'light_gbm':{
-        'device': param_eval(params.lgbm__device),
-        'boosting_type': param_eval(params.lgbm__boosting_type),
-        'objective': param_eval(params.lgbm__objective),
-        'metric': param_eval(params.lgbm__metric),
-        'number_boosting_rounds': param_eval(params.lgbm__number_boosting_rounds),
-        'early_stopping_rounds': param_eval(params.lgbm__early_stopping_rounds),
-        'learning_rate': param_eval(params.lgbm__learning_rate),
-        'max_bin': param_eval(params.lgbm__max_bin),
-        'max_depth': param_eval(params.lgbm__max_depth),
-        'num_leaves': param_eval(params.lgbm__num_leaves),
-        'min_data_in_leaf': param_eval(params.lgbm__min_data_in_leaf),
-        'bagging_fraction': param_eval(params.lgbm__bagging_fraction),
-        'bagging_freq': param_eval(params.lgbm__bagging_freq),
-        'feature_fraction': param_eval(params.lgbm__feature_fraction),
-        'min_gain_to_split': param_eval(params.lgbm__min_gain_to_split),
-        'lambda_l1': param_eval(params.lgbm__lambda_l1),
-        'lambda_l2': param_eval(params.lgbm__lambda_l2),
-        'is_unbalanced': param_eval(params.lgbm__is_unbalanced),
-        'scale_pos_weight': param_eval(params.lgbm__scale_pos_weight),
-        'verbose': param_eval(params.verbose),
-        'random_state': RANDOM_SEED
+        'init':{
+            'boosting_type': param_eval(params.lgbm__boosting_type),
+            'objective': param_eval(params.lgbm__objective),
+            'n_estimators': param_eval(params.lgbm__n_estimators),
+            'num_leaves': param_eval(params.lgbm__num_leaves),
+            'max_depth': param_eval(params.lgbm__max_depth),
+            'subsample_for_bin': param_eval(params.lgbm__subsample_for_bin),
+            'learning_rate': param_eval(params.lgbm__learning_rate),
+            'min_child_samples': param_eval(params.lgbm__min_child_samples),
+            'subsample': param_eval(params.lgbm__subsample),
+            'colsample_bytree': param_eval(params.lgbm__colsample_bytree),
+            'reg_alpha': param_eval(params.lgbm__reg_alpha),
+            'reg_lambda': param_eval(params.lgbm__reg_lambda),
+            'class_weight': param_eval(params.lgbm__class_weight),
+            'random_state': RANDOM_SEED,
+        },
+        'fit':{
+            'early_stopping_rounds': param_eval(params.lgbm__early_stopping_rounds),
+            'eval_metric': param_eval(params.lgbm__eval_metric),
+            'verbose': param_eval(params.verbose),
+        },
     },
     'catboost': {
         'loss_function': param_eval(params.catboost__loss_function),
         'eval_metric': param_eval(params.catboost__eval_metric),
         'iterations': param_eval(params.catboost__iterations),
-        'early_stopping_rounds': param_eval(params.catboost__early_stopping_rounds),
         'learning_rate': param_eval(params.catboost__learning_rate),
         'depth': param_eval(params.catboost__depth),
         'l2_leaf_reg': param_eval(params.catboost__l2_leaf_reg),
@@ -80,24 +79,28 @@ SOLUTION_CONFIG = AttrDict({
     },
 
     'xgboost': {
-        'booster': param_eval(params.xgb__booster),
-        'objective': param_eval(params.xgb__objective),
-        'tree_method': param_eval(params.xgb__tree_method),
-        'eval_metric': param_eval(params.xgb__eval_metric),
-        'eta': param_eval(params.xgb__eta),
-        'max_depth': param_eval(params.xgb__max_depth),
-        'subsample': param_eval(params.xgb__subsample),
-        'colsample_bylevel': param_eval(params.xgb__colsample_bylevel),
-        'min_child_weight': param_eval(params.xgb__min_child_weight),
-        'lambda': param_eval(params.xgb__lambda),
-        'alpha': param_eval(params.xgb__alpha),
-        'max_bin': param_eval(params.xgb__max_bin),
-        'num_leaves': param_eval(params.xgb__max_leaves),
-        'num_boost_round': param_eval(params.xgb__num_boost_round),
-        'early_stopping_rounds': param_eval(params.xgb__early_stopping_rounds),
-        'scale_pos_weight': param_eval(params.xgb__scale_pos_weight),
-        'verbose': param_eval(params.verbose),
-        'nthread': param_eval(params.num_workers),
+        'init':{
+            'booster': param_eval(params.xgb__booster),
+            'objective': param_eval(params.xgb__objective),
+            'tree_method': param_eval(params.xgb__tree_method),
+            'learning_rate': param_eval(params.xgb__learning_rate),
+            'max_depth': param_eval(params.xgb__max_depth),
+            'n_estimators': param_eval(params.xgb__n_estimators),
+            'subsample': param_eval(params.xgb__subsample),
+            'colsample_bylevel': param_eval(params.xgb__colsample_bylevel),
+            'scale_pos_weight': param_eval(params.xgb__scale_pos_weight),
+            'reg_lambda': param_eval(params.xgb__reg_lambda),
+            'reg_alpha': param_eval(params.xgb__reg_alpha),
+            'min_child_weight': param_eval(params.xgb__min_child_weight),
+            'num_leaves': param_eval(params.xgb__max_leaves),
+            'max_bin': param_eval(params.xgb__max_bin),
+            'n_jobs': param_eval(params.num_workers),
+        },
+        'fit':{
+            'eval_metric': param_eval(params.xgb__eval_metric),
+            'early_stopping_rounds': param_eval(params.xgb__early_stopping_rounds),
+            'verbose': param_eval(params.xgb__verbose),
+        },
     },
 
     'random_forest': {
@@ -160,102 +163,5 @@ SOLUTION_CONFIG = AttrDict({
         'minibatch_frac': param_eval(params.ngboost__minibatch_frac)
     },
 
-    'tuner': {
-        'LightGBM':{
-                'boosting_type': param_eval(params.tuning_lgbm__boosting_type),
-                'objective': param_eval(params.tuning_lgbm__objective),
-                'metric': param_eval(params.tuning_lgbm__metric),
-                'number_boosting_rounds': param_eval(params.tuning_lgbm__number_boosting_rounds),
-                'early_stopping_rounds': param_eval(params.tuning_lgbm__early_stopping_rounds),
-                'learning_rate': param_eval(params.tuning_lgbm__learning_rate),
-                'max_bin': param_eval(params.tuning_lgbm__max_bin),
-                'max_depth': param_eval(params.tuning_lgbm__max_depth),
-                'num_leaves': param_eval(params.tuning_lgbm__num_leaves),
-                'min_data_in_leaf': param_eval(params.tuning_lgbm__min_data_in_leaf),
-                'bagging_fraction': param_eval(params.tuning_lgbm__bagging_fraction),
-                'bagging_freq': param_eval(params.tuning_lgbm__bagging_freq),
-                'feature_fraction': param_eval(params.tuning_lgbm__feature_fraction),
-                'min_gain_to_split': param_eval(params.tuning_lgbm__min_gain_to_split),
-                'lambda_l1': param_eval(params.tuning_lgbm__lambda_l1),
-                'lambda_l2': param_eval(params.tuning_lgbm__lambda_l2),
-                'is_unbalanced': param_eval(params.tuning_lgbm__is_unbalanced),
-                'scale_pos_weight': param_eval(params.tuning_lgbm__scale_pos_weight),
-            },
-        'CatBoost': {
-                'loss_function': param_eval(params.tuning_catboost__loss_function),
-                'eval_metric': param_eval(params.tuning_catboost__eval_metric),
-                'iterations': param_eval(params.tuning_catboost__iterations),
-                'learning_rate': param_eval(params.tuning_catboost__learning_rate),
-                'depth': param_eval(params.tuning_catboost__depth),
-                'l2_leaf_reg': param_eval(params.tuning_catboost__l2_leaf_reg),
-                'colsample_bylevel': param_eval(params.tuning_catboost__colsample_bylevel),
-                'max_bin': param_eval(params.tuning_catboost__max_bin),
-                'od_type': param_eval(params.tuning_catboost__od_type),
-                'od_wait': param_eval(params.tuning_catboost__od_wait),
-                'thread_count': [params.num_workers],
-            },
-        'XGBoost': {
-                'booster': param_eval(params.tuning_xgb__booster),
-                'objective': param_eval(params.tuning_xgb__objective),
-                'tree_method': param_eval(params.tuning_xgb__tree_method),
-                'eval_metric': param_eval(params.tuning_xgb__eval_metric),
-                'eta': param_eval(params.tuning_xgb__eta),
-                'max_depth': param_eval(params.tuning_xgb__max_depth),
-                'subsample': param_eval(params.tuning_xgb__subsample),
-                'colsample_bylevel': param_eval(params.tuning_xgb__colsample_bylevel),
-                'min_child_weight': param_eval(params.tuning_xgb__min_child_weight),
-                'lambda': param_eval(params.tuning_xgb__lambda),
-                'alpha': param_eval(params.tuning_xgb__alpha),
-                'max_bin': param_eval(params.tuning_xgb__max_bin),
-                'num_leaves': param_eval(params.tuning_xgb__max_leaves),
-                'num_boost_round': param_eval(params.tuning_xgb__num_boost_round),
-                'early_stopping_rounds': param_eval(params.tuning_xgb__early_stopping_rounds),
-                'scale_pos_weight': param_eval(params.tuning_xgb__scale_pos_weight),
-                'nthread': [param_eval(params.num_workers)],
-            },
-        'NeuralNetwork': {
-            'architecture_config': {
-                'model_params': {
-                    'layers': param_eval(params.tuning_nn__layers),
-                    'neurons': param_eval(params.tuning_nn__neurons),
-                    'activation': param_eval(params.tuning_nn__activation),
-                    'dropout': param_eval(params.tuning_nn__dropout),
-                    'batch_norm': param_eval(params.tuning_nn__batch_norm),
-                    'l1': param_eval(params.tuning_nn__l1),
-                    'l2': param_eval(params.tuning_nn__l2)
-                },
-                'optimizer_params': {
-                    'lr': param_eval(params.tuning_nn__learning_rate),
-                    'beta_1': param_eval(params.tuning_nn__beta_1),
-                    'beta_2': param_eval(params.tuning_nn__beta_2)
-                }
-            },
-            'training_config': {
-                'epochs': param_eval(params.tuning_nn__epochs),
-                'batch_size': param_eval(params.tuning_nn__batch_size)
-            },
-            'callbacks_config': [{}],
-            },
-        'RandomForest': {
-            'n_estimators': param_eval(params.tuning_rf__n_estimators),
-            'criterion': param_eval(params.tuning_rf__criterion),
-            'max_features': param_eval(params.tuning_rf__max_features),
-            'max_depth': param_eval(params.tuning_rf__max_depth),
-            'min_samples_split': param_eval(params.tuning_rf__min_samples_split),
-            'min_samples_leaf': param_eval(params.tuning_rf__min_samples_leaf),
-            'max_leaf_nodes': param_eval(params.tuning_rf__max_leaf_nodes),
-            'n_jobs': [param_eval(params.num_workers)],
-            'class_weight': param_eval(params.tuning_rf__class_weight),
-        },
-        'LogisticRegression': {
-            'penalty': param_eval(params.tuning_lr__penalty),
-            'tol': param_eval(params.tuning_lr__tol),
-            'C': param_eval(params.tuning_lr__C),
-            'fit_intercept': param_eval(params.tuning_lr__fit_intercept),
-            'class_weight': param_eval(params.tuning_lr__class_weight),
-            'solver': param_eval(params.tuning_lr__solver),
-            'max_iter': param_eval(params.tuning_lr__max_iter),
-            'n_jobs': [param_eval(params.num_workers)],
-            },
-    }
+    
 })

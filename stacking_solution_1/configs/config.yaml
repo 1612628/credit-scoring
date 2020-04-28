@@ -89,57 +89,37 @@ parameters:
   use_train: True
 
 # Light GBM
+  #init
   lgbm__device: cpu
   lgbm__boosting_type: goss
   lgbm__objective: binary
-  lgbm__metric: auc
-  lgbm__number_boosting_rounds: 1000
-  lgbm__early_stopping_rounds: 50
-  lgbm__learning_rate: 0.28
-  lgbm__max_bin: 512
-  lgbm__max_depth: 12
+  lgbm__n_estimators: 1
   lgbm__num_leaves: 10
-  lgbm__min_data_in_leaf: 100
-  lgbm__bagging_fraction: 1.
-  lgbm__bagging_freq: 1
-  lgbm__feature_fraction: 0.65
-  lgbm__min_gain_to_split: 0.0
-  lgbm__lambda_l1: 2.0
-  lgbm__lambda_l2: 2.0
-  lgbm__is_unbalanced: True 
-  lgbm__scale_pos_weight: 1
-# Light GBM hyperparameters tuning
-  tuning_lgbm__boosting_type: [goss]
-  tuning_lgbm__objective: [binary]
-  tuning_lgbm__metric: [auc]
-  tuning_lgbm__number_boosting_rounds: [20]
-  tuning_lgbm__early_stopping_rounds: [20]
-  tuning_lgbm__learning_rate: [0.1]
-  tuning_lgbm__max_bin: [511]
-  tuning_lgbm__max_depth: [10]
-  tuning_lgbm__num_leaves: [10]
-  tuning_lgbm__min_data_in_leaf: [80]
-  tuning_lgbm__bagging_fraction: [1.0]
-  tuning_lgbm__bagging_freq: [1]
-  tuning_lgbm__feature_fraction: [0.65]
-  tuning_lgbm__min_gain_to_split: [0.0]
-  tuning_lgbm__lambda_l1: [3.0]
-  tuning_lgbm__lambda_l2: [8.0, 10.0]
-  tuning_lgbm__is_unbalanced: [True]
-  tuning_lgbm__scale_pos_weight: [60.7]
+  lgbm__max_depth: 12
+  lgbm__subsample_for_bin: 512
+  lgbm__learning_rate: 0.01
+  lgbm__min_child_samples: 100
+  lgbm__subsample: 1.
+  lgbm__colsample_bytree: 0.65
+  lgbm__reg_alpha: 2.0
+  lgbm__reg_lambda: 2.0
+  lgbm__class_weight: None
+  #fit
+  lgbm__early_stopping_rounds: 50
+  lgbm__eval_metric: logloss
+  lgbm__verbose: False
 
 # Catboost
   catboost__loss_function: Logloss
   catboost__eval_metric: AUC
-  catboost__iterations: 1000
-  catboost__early_stopping_rounds: 50
-  catboost__learning_rate: 0.3
+  catboost__iterations: 1
+  catboost__learning_rate: 0.01
   catboost__depth: 10
   catboost__l2_leaf_reg: 3.0
   catboost__max_bin: 127
   catboost__colsample_bylevel: 1.0
   catboost__od_type: 'Iter'
-  catboost__od_wait: 5 
+  catboost__od_wait: 50
 # Catboost hyperparameter tunning
   tuning_catboost__loss_function: [Logloss]
   tuning_catboost__eval_metric: [AUC]
@@ -150,25 +130,27 @@ parameters:
   tuning_catboost__max_bin: [127] 
   tuning_catboost__colsample_bylevel: [1.0]
   tuning_catboost__od_type: ['Iter']
-  tuning_catboost__od_wait: [5]
 
 # XGBoost
+  #init
   xgb__booster: gbtree
-  xgb__tree_method: exact # gpu_hist  # auto  hist
+  xgb__tree_method: auto #exact  gpu_hist  # auto  hist
   xgb__objective: binary:logistic
-  xgb__eval_metric: auc
-  xgb__num_boost_round: 1000
-  xgb__early_stopping_rounds: 50
-  xgb__eta: 0.15
-  xgb__max_leaves: 10
+  xgb__learning_rate: 0.01
   xgb__max_depth: 10 
-  xgb__max_bin: 127 
+  xgb__n_estimators: 1
   xgb__subsample: 1.0
   xgb__colsample_bylevel: 1.0
-  xgb__min_child_weight: 3
-  xgb__lambda: 2
-  xgb__alpha: 1
   xgb__scale_pos_weight: 60.7
+  xgb__reg_lambda: 2
+  xgb__reg_alpha: 1
+  xgb__min_child_weight: 3
+  xgb__max_leaves: 10
+  xgb__max_bin: 127 
+  #fit
+  xgb__eval_metric: auc
+  xgb__early_stopping_rounds: 50
+  xgb__verbose: False
 
 # XGBoost hyperparameter tunning
   tuning_xgb__booster: [gbtree] #dart
@@ -216,7 +198,7 @@ parameters:
   tuning_nn__batch_size: [100, 500 ,1000]
 
 # Random forest
-  rf__n_estimators: 50
+  rf__n_estimators: 1
   rf__criterion: gini
   rf__max_features: 1
   rf__max_depth: 20
@@ -252,10 +234,10 @@ parameters:
   tuning_lr__max_iter: [20, 50, 100]
 
 # Natural Gradient Boosting
-  ngboost__n_estimators: 100
-  ngboost__learning_rate: 0.1
+  ngboost__n_estimators: 1
+  ngboost__learning_rate: 0.01
   ngboost__minibatch_frac: 0.68
   
 
 # Blending model
-  blending__use_feature_in_secondary: False
+  blending__use_feature_in_secondary: True

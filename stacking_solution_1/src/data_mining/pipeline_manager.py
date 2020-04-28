@@ -27,6 +27,9 @@ from . import pipeline_config as config
 from . import pipeline_blocks as blocks
 from .pipelines import PIPELINES 
 from ..common.utils import init_logger, read_params, set_seed, param_eval, create_submission, add_prefix_keys
+
+from ..data_preprocessing.data_cleaning import KalapaCleaning
+from ..data_preprocessing.feature_extraction import KalapaFeatureExtraction
     
 set_seed(config.RANDOM_SEED)
 logger = init_logger()
@@ -67,7 +70,7 @@ class PipelineManager:
         hyperparameter_tunning(pipeline_name, False, tag, train_filepath, test_filepath)
     
     def algos_test(self, data_dev_mode, tag):
-        multiple_algos_test(False, tag)
+        multiple_algos_test(data_dev_mode, tag)
 
 def preprocessing(data_dev_mode, tag, train_filepath, test_filepath, train_preprocessed_filepath, test_preprocessed_filepath):
     logger.info('PREPROCESSING...')
@@ -237,10 +240,11 @@ def multiple_algos_test(data_dev_mode, tag):
                             config.params.cv_X_dev_preprocessed_filepaths,
                             config.params.cv_y_dev_filepaths)
 
-    logger.info('TESTING SINGLE MODELS...')
-    for algo in ['LightGBM', 'CatBoost', 'XGBoost', 'RandomForest', 'NGBoost']:
-        pipeline = PIPELINES[algo](so_config = config.SOLUTION_CONFIG, suffix=tag)
-        _cross_validate_auc(pipeline, kfold, features=None)
+    # logger.info('TESTING SINGLE MODELS...')
+    # 
+    # for algo in ['LightGBM', 'CatBoost', 'XGBoost', 'RandomForest', 'NGBoost', 'NeuralNetwork']:
+    #     pipeline = PIPELINES[algo](so_config = config.SOLUTION_CONFIG, suffix=tag)
+    #     _cross_validate_auc(pipeline, kfold, features=None)
     
     logger.info('TESTING BLENDING MODES...')
     base_models=[
@@ -326,7 +330,7 @@ def hyperparameter_tunning(pipeline_name, data_dev_mode, tag, train_filepath, te
 
 def _read_data(data_dev_mode, train_filepath, test_filepath):
     logger.info('Reading data...')
-    if data_dev_mode:
+    if data_dev_mode == True:
         nrows = config.DEV_SAMPLE_SIZE
         logger.info(f'Running in "dev-mode" with sample size of {nrows}')
     else:
@@ -349,12 +353,12 @@ def _read_data(data_dev_mode, train_filepath, test_filepath):
 
 def _read_kfold_data(data_dev_mode, cv_X_train_filepaths, cv_y_train_filepaths, cv_X_dev_filepaths, cv_y_dev_filepaths):
     logger.info('Reading kfold data...')
-    if data_dev_mode:
+    if data_dev_mode == True:
         nrows = config.DEV_SAMPLE_SIZE
         logger.info(f'Running in "dev-mode" with sample size of {nrows}')
     else:
         nrows = None
-
+    
     kfold = []
 
     for i in range(0,len(cv_X_train_filepaths)):
@@ -382,7 +386,7 @@ def _cross_validate_auc(model, kfold, features=None, **clf_params):
 
         fig, ax = plt.subplots()
         fig.set_size_inches((16,10))
-        for i in range(0, len(kfold)):
+        for i in range(0, 3):
           print("{}/{}".format(i+1, len(kfold)))
           kf = kfold[i]
           X_train_kf, y_train_kf = kf["X_train"].copy(), kf["y_train"].copy()
@@ -452,3 +456,16 @@ def _get_KFold(X, y, n_splits, random_state=None):
     y_dev.reset_index(inplace=True, drop=True)
 
   return splits
+
+def test_kalapa_preprocessing(train_filepath, test_filepath):
+    data = _read_data(True, train_filepath, test_filepath)
+    train = data['train']
+    test = data['test']
+    
+    clean = KalapaCleaning()
+    train, test = clean.fit_transform(train, test)
+    extraction = KalapaFeatureExtraction()
+    train, test = extraction.fit_transform(train, test)
+    
+    return (train, test)
+    
