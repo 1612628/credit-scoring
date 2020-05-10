@@ -1,7 +1,7 @@
 parameters:
 # Data
-  train_filepath: './input/train_input_single_imputed.csv'
-  test_filepath: './input/test_input_single_imputed.csv'
+  train_filepath: './input/train.csv'
+  test_filepath: './input/test.csv'
   train_preprocessed_filepath: './input/train_input_preprocessed.csv'
   test_preprocessed_filepath: './input/test_input_preprocessed.csv'
   train_woe_filepath: './input/train_woe_input.csv'

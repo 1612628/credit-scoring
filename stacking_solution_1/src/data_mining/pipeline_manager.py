@@ -71,6 +71,8 @@ class PipelineManager:
     
     def algos_test(self, data_dev_mode, tag):
         multiple_algos_test(data_dev_mode, tag)
+    def kalapa_preprocessing(self, data_dev_mode, train_filepath = config.params.train_filepath, test_filepath=config.params.test_filepath):
+        return kalapa_kfold_preprocessing(data_dev_mode, train_filepath, test_filepath)
 
 def preprocessing(data_dev_mode, tag, train_filepath, test_filepath, train_preprocessed_filepath, test_preprocessed_filepath):
     logger.info('PREPROCESSING...')
@@ -435,7 +437,6 @@ def _cross_validate_auc(model, kfold, features=None, **clf_params):
         ax.legend(loc="center left", bbox_to_anchor=(1, 0.5))
         plt.show()
 
-
 def _get_KFold(X, y, n_splits, random_state=None):
   splits = []
   kf = KFold(n_splits=n_splits, random_state=random_state, shuffle=True)
@@ -457,15 +458,29 @@ def _get_KFold(X, y, n_splits, random_state=None):
 
   return splits
 
-def test_kalapa_preprocessing(train_filepath, test_filepath):
-    data = _read_data(True, train_filepath, test_filepath)
+def kalapa_kfold_preprocessing(data_dev_mode, train_filepath, test_filepath):
+    data = _read_data(data_dev_mode, train_filepath, test_filepath)
     train = data['train']
-    test = data['test']
+    y = train['label']
+    X = train.drop(columns=['label'], inplace=True)
+    KFolds = _get_KFold(X, y, 5)
     
-    clean = KalapaCleaning()
-    train, test = clean.fit_transform(train, test)
-    extraction = KalapaFeatureExtraction()
-    train, test = extraction.fit_transform(train, test)
+    for i in range(len(KFolds)):
+        X_train, X_dev = KFolds[i]['X_train'], KFolds[i]['X_dev']
+        y_train = KFolds[i]['y_train']
+        
+        y_train = pd.DataFrame(y_train, columns=['label'])
+        X_train_p = pd.concat([X_train, y_train], axis=1)
+        
+        clean = KalapaCleaning()
+        X_train, X_dev = clean.fit_transform(X_train_p, X_dev)
+        extraction = KalapaFeatureExtraction()
+        X_train, X_dev = extraction.fit_transform(X_train_p, X_dev)
+        
+        X_train.drop(columns=['label'], inplace=True)
+        KFolds[i]['X_train'] = X_train
+        KFolds[i]['X_dev'] = X_dev
+        
     
-    return (train, test)
+    return KFolds
     
