@@ -71,8 +71,18 @@ class PipelineManager:
     
     def algos_test(self, data_dev_mode, tag):
         multiple_algos_test(data_dev_mode, tag)
-    def kalapa_preprocessing(self, data_dev_mode, train_filepath = config.params.train_filepath, test_filepath=config.params.test_filepath):
-        return kalapa_kfold_preprocessing(data_dev_mode, train_filepath, test_filepath)
+    def kalapa_preprocessing(self, data_dev_mode, 
+                        X_train_filepaths=config.params.cv_X_train_filepaths,
+                        y_train_filepaths=config.params.cv_y_train_filepaths,
+                        X_dev_filepaths=config.params.cv_X_dev_filepaths,
+                        y_dev_filepaths=config.params.cv_y_dev_filepaths):
+        return kalapa_kfold_preprocessing(
+            data_dev_mode, 
+            X_train_filepaths,
+            y_train_filepaths,
+            X_dev_filepaths,
+            y_dev_filepaths)
+        
 
 def preprocessing(data_dev_mode, tag, train_filepath, test_filepath, train_preprocessed_filepath, test_preprocessed_filepath):
     logger.info('PREPROCESSING...')
@@ -458,12 +468,8 @@ def _get_KFold(X, y, n_splits, random_state=None):
 
   return splits
 
-def kalapa_kfold_preprocessing(data_dev_mode, train_filepath, test_filepath):
-    data = _read_data(data_dev_mode, train_filepath, test_filepath)
-    train = data['train']
-    y = train['label']
-    X = train.drop(columns=['label'], inplace=True)
-    KFolds = _get_KFold(X, y, 5)
+def kalapa_kfold_preprocessing(data_dev_mode, cv_X_train_filepaths, cv_y_train_filepaths, cv_X_dev_filepaths, cv_y_dev_filepaths):
+    KFolds = _read_kfold_data(data_dev_mode, cv_X_train_filepaths, cv_y_train_filepaths, cv_X_dev_filepaths, cv_y_dev_filepaths)
     
     for i in range(len(KFolds)):
         X_train, X_dev = KFolds[i]['X_train'], KFolds[i]['X_dev']

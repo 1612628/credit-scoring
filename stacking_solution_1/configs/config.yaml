@@ -8,24 +8,17 @@ parameters:
   test_woe_filepath: './input/test_woe_input.csv'
   first_level_oof_predictions_dir: './models/stacking_1/oof'
   cv_X_train_filepaths:
-    - './cv_input/X_train_single_1.csv'
-    - './cv_input/X_train_single_2.csv'
-    - './cv_input/X_train_single_3.csv'
-    - './cv_input/X_train_single_4.csv'
-    - './cv_input/X_train_single_5.csv'
+    - './cv_input/X_train.csv'
+    - './cv_input/X_train.csv'
+    - './cv_input/X_train.csv'
+    - './cv_input/X_train.csv'
+    - './cv_input/X_train.csv'
   cv_X_train_preprocessed_filepaths:
     - './cv_input/X_train_preprocessed_1.csv'
     - './cv_input/X_train_preprocessed_2.csv'
     - './cv_input/X_train_preprocessed_3.csv'
     - './cv_input/X_train_preprocessed_4.csv'
     - './cv_input/X_train_preprocessed_5.csv'
-  cv_X_train_preprocessed_final_filepaths:
-    - './cv_input/X_train_preprocessed_final_1.csv'
-    - './cv_input/X_train_preprocessed_final_2.csv'
-    - './cv_input/X_train_preprocessed_final_3.csv'
-    - './cv_input/X_train_preprocessed_final_4.csv'
-    - './cv_input/X_train_preprocessed_final_5.csv'
-
   cv_y_train_filepaths:
     - './cv_input/y_train_1.csv'
     - './cv_input/y_train_2.csv'
@@ -51,14 +44,7 @@ parameters:
     - './cv_input/X_dev_preprocessed_3.csv'
     - './cv_input/X_dev_preprocessed_4.csv'
     - './cv_input/X_dev_preprocessed_5.csv'
-  cv_X_dev_preprocessed_final_filepaths:
-    - './cv_input/X_dev_preprocessed_final_1.csv'
-    - './cv_input/X_dev_preprocessed_final_2.csv'
-    - './cv_input/X_dev_preprocessed_final_3.csv'
-    - './cv_input/X_dev_preprocessed_final_4.csv'
-    - './cv_input/X_dev_preprocessed_final_5.csv'
-
-  
+    
   experiment_dir: './models/stacking_1/exp'
   params_dir: './models/params'
 # Data preparation
